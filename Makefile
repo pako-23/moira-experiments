@@ -94,7 +94,7 @@ $(EXPERIMENTS_DIR):
 	@mkdir $(EXPERIMENTS_DIR)
 
 moira:
-	git clone --quiet -b v0.0.1 git@github.com:pako-23/moira.git
+	git clone --quiet -b v0.0.1 https://github.com:pako-23/moira.git
 
 moira/agent/build/libs/agent.jar: | moira
 	cd moira && ./gradlew agent:build
