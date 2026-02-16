@@ -2,15 +2,9 @@ runs := 1 2 3 4 5 6 7 8 9 10
 experiments := online
 experiment_files := $(foreach exp,$(experiments),$(exp)-conflicts.txt $(exp)-verified.txt) plain.txt
 
-all: $(foreach run,$(runs),$(foreach file,$(experiment_files),run-$(run)/$(file)))
+all: $(foreach run,$(runs),$(foreach file,$(experiment_files),run-$(run)/$(file))) run-1/online-verified.txt
 
-define mvn_exec
-@if test -f mvnw; then \
-	JAVA_HOME=$(JAVA_HOME) ./mvnw $(1); \
-else \
-	JAVA_HOME=$(JAVA_HOME) $(MVN_HOME)/bin/mvn $(1); \
-fi
-endef
+mvn_exec = JAVA_HOME=$(JAVA_HOME) $(MVN_BIN) $(1)
 
 define java_exec
 if test $$($(JAVA_HOME)/bin/java -version 2>&1 | head -n 1 | awk -F '"' '{print $$2}' | cut -d. -f1) -ge 9; then \
@@ -20,13 +14,10 @@ else \
 fi
 endef
 
-target:
-	$(call mvn_exec,compile test-compile)
-
-classpath: | target
+classpath: testsuite
 	$(call mvn_exec,dependency:build-classpath -DincludeScope=test -Dmdep.outputFile=classpath)
 
-testsuite: | target
+testsuite:
 	$(call mvn_exec,test) || true
 	@find target/ -name 'TEST*.xml' -print0 | xargs -0 sed -n -e 's/^<testsuite .* name="\([^"]*\)".*$$/\1/p' | sort -u > testsuite
 
