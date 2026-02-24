@@ -57,6 +57,24 @@ testsuite:
 		fi; \
 	done < $^
 
+maven_test_execution_order cp.txt reference-output.csv test-execution-order enumerations package-filter &: testsuite classpath
+	start_time="$$(date -u +%s)" ; \
+	find target/ -name 'TEST*.xml' -print0 | xargs -0 grep testcase | grep time | grep name | awk -F'"' '{for (i = 1; i <= NF; i++) {if ($$i ~ /classname=/) {classname=$$(i+1)} else if ($$i ~ /name=/) {name=$$(i+1)}} if (classname && name) {print classname "." name}}' > maven_test_execution_order && \
+	$(call mvn_exec,dependency:build-classpath -DincludeScope=test -Dmdep.outputFile=cp.txt) && \
+	BIN=$(top_srcdir)/experiments/pradet-replication/bin JAVA_HOME=$(JAVA_HOME) $(top_srcdir)/experiments/pradet-replication/scripts/generate_test_order.sh maven_test_execution_order && \
+	BIN=$(top_srcdir)/experiments/pradet-replication/bin JAVA_HOME=$(JAVA_HOME) PATH="$(JAVA_HOME)/bin:$$PATH" $(top_srcdir)/experiments/pradet-replication/scripts/bootstrap_enums.sh && \
+	$(top_srcdir)/experiments/pradet-replication/scripts/create_package_filter.sh && \
+	echo "electric-test-setup: $$(expr "$$(date -u +%s)" - "$$start_time")" >> running-times
+
+%electric-test-conflicts.txt: maven_test_execution_order cp.txt reference-output.csv test-execution-order enumerations package-filter
+	mkdir -p $(dir $@) ; \
+	start_time="$$(date -u +%s)" ; \
+	BIN=$(top_srcdir)/experiments/pradet-replication/bin \
+	DATADEP_DETECTOR_HOME=$(top_srcdir)/experiments/pradet-replication/datadep-detector \
+	JAVA_HOME=$(JAVA_HOME) $(top_srcdir)/experiments/pradet-replication/scripts/collect.sh && \
+	echo "electric-test: $$(expr "$$(date -u +%s)" - "$$start_time")" >> running-times; \
+	sed -E 's/([^,]+)\.([^,]+),([^,]+)\.([^,]+)/from: \1[\2(\1)], to: \3[\4(\3)]/' deps.csv > $@
+
 .PHONY: clean
 clean:
 	- rm -f running-times

@@ -85,6 +85,7 @@ $(call experiment_repodir,$(1))/$(call experiment_subdir,$(1))Makefile: | $(call
 	else \
 		printf "MVN_BIN = $(PWD)/$(call experiment_mvn,$(1))/bin/mvn\n" >> $$@; \
 	fi
+	@printf "MVN_HOME = $(PWD)/$(call experiment_mvn,$(1))\n" >> $$@
 	@printf "include $(PWD)/experiment.mk\n" >> $$@
 
 .PHONY: run-$(call experiment_id,$(1))
@@ -94,7 +95,7 @@ run-$(call experiment_id,$(1)): $(call experiment_repodir,$(1))/$(call experimen
 	moira/util/build/libs/util.jar \
 	$(call experiment_repodir,$(1)) \
 	$(call experiment_java,$(1)) \
-	$(call experiment_mvn,$(1))
+	$(call experiment_mvn,$(1)) | $(EXPERIMENTS_DIR)/pradet-replication
 	$(MAKE) -C $(call experiment_repodir,$(1))/$(call experiment_subdir,$(1)) all
 
 all: run-$(word 1,$(subst $(comma), ,$(1)))
@@ -159,6 +160,11 @@ moira/moira/build/libs/moira.jar: | moira
 
 moira/util/build/libs/util.jar: | moira
 	cd moira && ./gradlew util:build
+
+$(EXPERIMENTS_DIR)/pradet-replication: | $(EXPERIMENTS_DIR)/jdk8u462-b08 $(EXPERIMENTS_DIR)/apache-maven-3.6.1
+	git clone --quiet https://github.com/gmu-swe/pradet-replication $@ && \
+	cd $@ && git clone https://github.com/skappler/datadep-detector && cd datadep-detector && \
+	JAVA_HOME=$(PWD)/$(EXPERIMENTS_DIR)/jdk8u462-b08 $(PWD)/$(EXPERIMENTS_DIR)/apache-maven-3.6.1/bin/mvn clean install -DskipTests
 
 $(EXPERIMENTS_DIR)/jdk8u462-b08: | $(EXPERIMENTS_DIR)
 	@wget -q https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u462-b08/OpenJDK8U-jdk_x64_linux_hotspot_8u462b08.tar.gz -P /tmp && \
