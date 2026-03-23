@@ -1,5 +1,5 @@
 runs := 1 2 3 4 5 6 7 8 9 10
-experiments := online
+experiments := online electric-test
 experiment_files := $(foreach exp,$(experiments),$(exp)-conflicts.txt $(exp)-verified.txt) plain.txt
 
 all: $(foreach run,$(runs),$(foreach file,$(experiment_files),run-$(run)/$(file))) run-1/online-verified.txt
@@ -40,6 +40,7 @@ testsuite:
 	echo "online-profiler: $$(expr "$$(date -u +%s)" - "$$start_time")" >> running-times
 
 %-verified.txt: %-conflicts.txt
+	touch $@; \
 	already_done="$$(find . -name '*-verified.txt' -print0 | grep -vFz "$@" | xargs -0 sort | uniq)" ; \
 	while read -r pair; do \
 		if echo "$$already_done" | grep -cFq "$$pair"; then \

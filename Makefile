@@ -67,7 +67,7 @@ define experiment =
 ifndef $(subst /,-,$(call experiment_repodir,$(1)))_REPO
 $(subst /,-,$(call experiment_repodir,$(1)))_REPO := 1
 
-$(call experiment_repodir,$(1)):
+$(call experiment_repodir,$(1)): | $(call experiment_java,$(1)) $(call experiment_mvn,$(1))
 	git clone --quiet https://github.com/$(word 2,$(subst $(comma), ,$(1))) $$@ && \
 	cd $$@ && git -c advice.detachedHead=false checkout $(call experiment_commit,$(1)) && \
 	if test -f $(call experiment_repodir,$(1))/mvnw; then \
@@ -122,21 +122,21 @@ profile: profile-$(word 1,$(subst $(comma), ,$(1)))
 endef
 
 $(EXPERIMENTS_DIR)-joda-time_REPO := 1
-$(EXPERIMENTS_DIR)/joda-time: | $(EXPERIMENTS_DIR)
+$(EXPERIMENTS_DIR)/joda-time: | $(EXPERIMENTS_DIR)/apache-3.6.1 $(EXPERIMENTS_DIR)/jdk8u462-b08
 	git clone --quiet https://github.com/JodaOrg/joda-time $@ && \
 	cd $@ && git -c advice.detachedHead=false checkout d1ea2a53929d7d56d4f4560852e5586517a0dd47 && \
 	sed -i -e 's/3\.8\.2/4.13/' pom.xml
 	cd $@ && JAVA_HOME=$(PWD)/$(EXPERIMENTS_DIR)/jdk8u462-b08 $(PWD)/$(EXPERIMENTS_DIR)/apache-maven-3.6.1/bin/mvn install -DskipTests || true
 
 $(EXPERIMENTS_DIR)-riptide_REPO := 1
-$(EXPERIMENTS_DIR)/riptide: | $(EXPERIMENTS_DIR)
+$(EXPERIMENTS_DIR)/riptide: | $(EXPERIMENTS_DIR)/apache-3.6.1 $(EXPERIMENTS_DIR)/jdk8u462-b08
 	git clone --quiet https://github.com/zalando/riptide $@ && \
 	cd $@ && git -c advice.detachedHead=false checkout 8277e11fc069d8e24df0d233ef2577cc75659b75 && \
 	sed -i '/<plugin>/,/<\/plugin>/{H; /<plugin>/h; /<\/plugin>/!d; x;/dependency-check-maven/d;}' pom.xml
 	cd $@ && JAVA_HOME=$(PWD)/$(EXPERIMENTS_DIR)/jdk8u462-b08 $(PWD)/$(EXPERIMENTS_DIR)/apache-maven-3.6.1/bin/mvn install -DskipTests || true
 
 $(EXPERIMENTS_DIR)-dropwizard_REPO := 1
-$(EXPERIMENTS_DIR)/dropwizard: | $(EXPERIMENTS_DIR)
+$(EXPERIMENTS_DIR)/dropwizard: | $(EXPERIMENTS_DIR)/apache-3.6.1 $(EXPERIMENTS_DIR)/jdk8u462-b08
 	git clone --quiet https://github.com/dropwizard/dropwizard $@ && \
 	cd $@ && git -c advice.detachedHead=false checkout 07dfaed697427e208d65049f80a5d1949833b7cd && \
 	sed -i '/<plugin>/,/<\/plugin>/{H; /<plugin>/h; /<\/plugin>/!d; x;/dependency-check-maven/d;}' pom.xml
