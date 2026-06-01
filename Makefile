@@ -1,10 +1,12 @@
 EXPERIMENTS_DIR := experiments
 
 .PHONY: all
-all: | java-versions mvn-versions
+all: run-plain run-electric-test run-tuscan-class-only
 
-.PHONY: profile
-profile:
+.PHONY: run-plain run-electric-test run-tuscan-class-only
+run-plain:
+run-electric-test:
+run-tuscan-class-only:
 
 .PHONY: clean-experiments
 clean-experiments:
@@ -64,6 +66,7 @@ experiment_mvn = $(EXPERIMENTS_DIR)/$(word 6,$(subst $(comma), ,$(1)))
 
 define experiment =
 
+# Repository setup section
 ifndef $(subst /,-,$(call experiment_repodir,$(1)))_REPO
 $(subst /,-,$(call experiment_repodir,$(1)))_REPO := 1
 
@@ -88,36 +91,55 @@ $(call experiment_repodir,$(1))/$(call experiment_subdir,$(1))Makefile: | $(call
 	@printf "MVN_HOME = $(PWD)/$(call experiment_mvn,$(1))\n" >> $$@
 	@printf "include $(PWD)/experiment.mk\n" >> $$@
 
-.PHONY: run-$(call experiment_id,$(1))
-run-$(call experiment_id,$(1)): $(call experiment_repodir,$(1))/$(call experiment_subdir,$(1))Makefile \
-	moira/moira/build/libs/moira.jar \
-	moira/agent/build/libs/agent.jar \
+
+# Plain execution section
+.PHONY: run-plain-$(call experiment_id,$(1))
+run-plain-$(call experiment_id,$(1)): \
+	$(call experiment_repodir,$(1))/$(call experiment_subdir,$(1))Makefile \
+	| $(call experiment_java,$(1)) \
+	$(call experiment_mvn,$(1))
+	$(MAKE) -C $(call experiment_repodir,$(1))/$(call experiment_subdir,$(1)) plain
+
+
+# ElectricTest execution section
+.PHONY: run-electric-test-$(call experiment_id,$(1))
+run-electric-test-$(call experiment_id,$(1)): \
+	$(call experiment_repodir,$(1))/$(call experiment_subdir,$(1))Makefile \
+	$(EXPERIMENTS_DIR)/pradet-replication/datadep-detector/target/DependencyDetector-0.0.1-SNAPSHOT.jar \
+	| $(call experiment_java,$(1)) \
+	$(call experiment_mvn,$(1))
+	$(MAKE) -C $(call experiment_repodir,$(1))/$(call experiment_subdir,$(1)) electric-test
+
+
+# Tuscan Class-Only execution section
+.PHONY: run-tuscan-class-only-$(call experiment_id,$(1))
+run-tuscan-class-only-$(call experiment_id,$(1)): \
+	$(call experiment_repodir,$(1))/$(call experiment_subdir,$(1))Makefile \
 	moira/util/build/libs/util.jar \
-	$(call experiment_repodir,$(1)) \
-	$(call experiment_java,$(1)) \
-	$(call experiment_mvn,$(1)) | $(EXPERIMENTS_DIR)/pradet-replication
-	$(MAKE) -C $(call experiment_repodir,$(1))/$(call experiment_subdir,$(1)) all
+	| $(call experiment_java,$(1)) \
+	$(call experiment_mvn,$(1))
+	$(MAKE) -C $(call experiment_repodir,$(1))/$(call experiment_subdir,$(1)) tuscan-class-only
 
-all: run-$(word 1,$(subst $(comma), ,$(1)))
 
+# All targets section
+.PHONY: run-$(call experiment_id,$(1))
+run-$(call experiment_id,$(1)): \
+	run-plain-$(call experiment_id,$(1)) \
+	run-electric-test-$(call experiment_id,$(1))
+	run-tuscan-class-only-$(call experiment_id,$(1))
+
+
+run-plain: run-plain-$(call experiment_id,$(1))
+run-electric-test: run-electric-test-$(call experiment_id,$(1))
+run-tuscan-class-only: run-tuscan-class-only-$(call experiment_id,$(1))
+
+
+# Cleanup targets section
 .PHONY: clean-$(word 1,$(subst $(comma), ,$(1)))
 clean-$(word 1,$(subst $(comma), ,$(1))):
 	$(MAKE) -C $(call experiment_repodir,$(1))/$(call experiment_subdir,$(1)) clean
 
 clean-experiments: clean-$(word 1,$(subst $(comma), ,$(1)))
-
-.PHONY: profile-$(call experiment_id,$(1))
-profile-$(call experiment_id,$(1)): $(call experiment_repodir,$(1))/$(call experiment_subdir,$(1))Makefile \
-	moira/moira/build/libs/moira.jar \
-	moira/agent/build/libs/agent.jar \
-	$(EXPERIMENTS_DIR)/lightweight-java-profiler/$(word 5,$(subst $(comma), ,$(1)))/liblagent.so | \
-	$(call experiment_repodir,$(1)) \
-	$(call experiment_java,$(1)) \
-	$(call experiment_mvn,$(1)) \
-	$(EXPERIMENTS_DIR)/FlameGraph
-	$(MAKE) -C $(call experiment_repodir,$(1))/$(call experiment_subdir,$(1)) profile
-
-profile: profile-$(word 1,$(subst $(comma), ,$(1)))
 
 endef
 
@@ -150,7 +172,7 @@ $(EXPERIMENTS_DIR):
 	@mkdir $(EXPERIMENTS_DIR)
 
 moira:
-	git clone --quiet -b v0.0.1 https://github.com/pako-23/moira.git
+	git clone --quiet https://github.com/pako-23/moira.git
 
 moira/agent/build/libs/agent.jar: | moira
 	cd moira && ./gradlew agent:build
@@ -161,10 +183,21 @@ moira/moira/build/libs/moira.jar: | moira
 moira/util/build/libs/util.jar: | moira
 	cd moira && ./gradlew util:build
 
-$(EXPERIMENTS_DIR)/pradet-replication: | $(EXPERIMENTS_DIR)/jdk8u462-b08 $(EXPERIMENTS_DIR)/apache-maven-3.6.1
-	git clone --quiet https://github.com/gmu-swe/pradet-replication $@ && \
-	cd $@ && git clone https://github.com/skappler/datadep-detector && cd datadep-detector && \
-	JAVA_HOME=$(PWD)/$(EXPERIMENTS_DIR)/jdk8u462-b08 $(PWD)/$(EXPERIMENTS_DIR)/apache-maven-3.6.1/bin/mvn clean install -DskipTests
+$(EXPERIMENTS_DIR)/pradet-replication:
+	git clone https://github.com/gmu-swe/pradet-replication $@ && \
+	cd $@ && git -c advice.detachedHead=false checkout 2441dca323bf828cb0e506c63381eff23d3d7af0
+
+$(EXPERIMENTS_DIR)/pradet-replication/datadep-detector: | $(EXPERIMENTS_DIR)/pradet-replication
+	git clone https://github.com/skappler/datadep-detector $@ && \
+	cd $@ && git -c advice.detachedHead=false checkout 0a07be1614a54017c14fdb6472059e04abf1a933
+
+$(EXPERIMENTS_DIR)/pradet-replication/datadep-detector/target/DependencyDetector-0.0.1-SNAPSHOT.jar: \
+	| $(EXPERIMENTS_DIR)/pradet-replication/datadep-detector \
+	$(EXPERIMENTS_DIR)/jdk8u462-b08 \
+	$(EXPERIMENTS_DIR)/apache-maven-3.6.1
+	cd $(EXPERIMENTS_DIR)/pradet-replication/datadep-detector && \
+	JAVA_HOME=$(PWD)/$(EXPERIMENTS_DIR)/jdk8u462-b08 \
+	$(PWD)/$(EXPERIMENTS_DIR)/apache-maven-3.6.1/bin/mvn clean install -DskipTests
 
 $(EXPERIMENTS_DIR)/jdk8u462-b08: | $(EXPERIMENTS_DIR)
 	@wget -q https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u462-b08/OpenJDK8U-jdk_x64_linux_hotspot_8u462b08.tar.gz -P /tmp && \
@@ -175,7 +208,7 @@ $(EXPERIMENTS_DIR)/jdk-24.0.2+12: | $(EXPERIMENTS_DIR)
 	tar xf /tmp/OpenJDK24U-jdk_x64_linux_hotspot_24.0.2_12.tar.gz -C $(EXPERIMENTS_DIR)
 
 .PHONY: java-versions
-java-versions: | $(EXPERIMENTS_DIR)/jdk8u462-b08
+java-versions: $(EXPERIMENTS_DIR)/jdk8u462-b08 $(EXPERIMENTS_DIR)/jdk-24.0.2+12
 
 define mvn_version =
 $(EXPERIMENTS_DIR)/apache-maven-$(1): | $(EXPERIMENTS_DIR)
@@ -196,19 +229,3 @@ $(eval $(call mvn_version,3.9.9))
 .PHONY: clean
 clean:
 	rm -rf $(EXPERIMENTS_DIR)
-
-$(EXPERIMENTS_DIR)/lightweight-java-profiler: | $(EXPERIMENTS_DIR)
-	@git clone --quiet https://github.com/yinheli/lightweight-java-profiler.git $@
-
-define profiler_version
-$(EXPERIMENTS_DIR)/lightweight-java-profiler/$(1)/liblagent.so: | $(EXPERIMENTS_DIR)/lightweight-java-profiler $(EXPERIMENTS_DIR)/$(1)
-	cd $(EXPERIMENTS_DIR)/lightweight-java-profiler && \
-	mkdir $(1) && \
-	$(MAKE) BITS=64 BUILD_DIR=$(1) INCLUDES='-I$(PWD)/$(EXPERIMENTS_DIR)/$(1)/include -I$(PWD)/$(EXPERIMENTS_DIR)/$(1)/include/linux' all
-endef
-
-$(eval $(call profiler_version,jdk8u462-b08))
-$(eval $(call profiler_version,jdk-24.0.2+12))
-
-$(EXPERIMENTS_DIR)/FlameGraph: | $(EXPERIMENTS_DIR)
-	@git clone --quiet https://github.com/brendangregg/FlameGraph.git $@
