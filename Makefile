@@ -1,10 +1,11 @@
 EXPERIMENTS_DIR := experiments
 
-.PHONY: all run-plain run-electric-test run-tuscan-class-only
-all: run-plain run-electric-test run-tuscan-class-only
+.PHONY: all run-plain run-electric-test run-tuscan-class-only run-tuscan-intra-class
+all: run-plain run-electric-test run-tuscan-class-only run-tuscan-intra-class
 run-plain:
 run-electric-test:
 run-tuscan-class-only:
+run-tuscan-intra-class:
 
 .PHONY: plain-stats
 plain-stats:
@@ -16,21 +17,9 @@ SUBJECTS := aismessages,tbsalling/aismessages,7b0c4c708b6bb9a6da3d5737bcad1857ad
 	c2mon-server-elasticsearch,c2mon/c2mon,d80687b119c713dd177a58cf53a997d8cc5ca264,c2mon-server/c2mon-server-elasticsearch,jdk8u462-b08,apache-maven-3.6.1 \
 	cukes-http,ctco/cukes,b483e1a8f261b80a66291a42fc455256b0b5059c,cukes-http,jdk8u462-b08,apache-maven-3.6.1 \
 	dropwizard-logging,dropwizard/dropwizard,07dfaed697427e208d65049f80a5d1949833b7cd,dropwizard-logging,jdk8u462-b08,apache-maven-3.6.1 \
-	dubbo-cluster,apache/dubbo,737f7a7ea67832d7f17517326fb2491d0a086dd7,dubbo-cluster,jdk8u462-b08,apache-maven-3.6.1 \
-	dubbo-common,apache/dubbo,737f7a7ea67832d7f17517326fb2491d0a086dd7,dubbo-common,jdk8u462-b08,apache-maven-3.6.1 \
-	dubbo-config-api,apache/dubbo,737f7a7ea67832d7f17517326fb2491d0a086dd7,dubbo-config/dubbo-config-api,jdk8u462-b08,apache-maven-3.6.1 \
-	dubbo-filter-cache,apache/dubbo,737f7a7ea67832d7f17517326fb2491d0a086dd7,dubbo-filter/dubbo-filter-cache,jdk8u462-b08,apache-maven-3.6.1 \
-	dubbo-rpc-api,apache/dubbo,737f7a7ea67832d7f17517326fb2491d0a086dd7,dubbo-rpc/dubbo-rpc-api,jdk8u462-b08,apache-maven-3.6.1 \
-	dubbo-rpc-dubbo,apache/dubbo,737f7a7ea67832d7f17517326fb2491d0a086dd7,dubbo-rpc/dubbo-rpc-dubbo,jdk8u462-b08,apache-maven-3.6.1 \
-	dubbo-serialization-fst,apache/dubbo,737f7a7ea67832d7f17517326fb2491d0a086dd7,dubbo-serialization/dubbo-serialization-fst,jdk8u462-b08,apache-maven-3.6.1 \
 	elastic-job-lite-core,elasticjob/elastic-job-lite,b022898ef1b8c984e17efb2a422ee45f6b13e46e,elastic-job-lite-core,jdk8u462-b08,apache-maven-3.6.1 \
 	fastjson,alibaba/fastjson,5c6d6fd471ea1fab59f0df2dd31e0b936806780d,.,jdk8u462-b08,apache-maven-3.6.1 \
 	guava,google/guava,8868c096cfdabbe38170b6e395369c315cfb72a1,guava-tests,jdk-24.0.2+12,apache-maven-3.9.9 \
-	hadoop-auth,apache/hadoop,aa96f1871bfd858f9bac59cf2a81ec470da649af,hadoop-common-project/hadoop-auth,jdk8u462-b08,apache-maven-3.6.1 \
-	hadoop-hdfs-nfs,apache/hadoop,aa96f1871bfd858f9bac59cf2a81ec470da649af,hadoop-hdfs-project/hadoop-hdfs-nfs,jdk8u462-b08,apache-maven-3.6.1 \
-	hadoop-mapreduce-client-app,apache/hadoop,aa96f1871bfd858f9bac59cf2a81ec470da649af,hadoop-mapreduce-project/hadoop-mapreduce-client/hadoop-mapreduce-client-app,jdk8u462-b08,apache-maven-3.6.1 \
-	hadoop-mapreduce-client-core,apache/hadoop,aa96f1871bfd858f9bac59cf2a81ec470da649af,hadoop-mapreduce-project/hadoop-mapreduce-client/hadoop-mapreduce-client-core,jdk8u462-b08,apache-maven-3.6.1 \
-	hadoop-mapreduce-client-hs,apache/hadoop,aa96f1871bfd858f9bac59cf2a81ec470da649af,hadoop-mapreduce-project/hadoop-mapreduce-client/hadoop-mapreduce-client-hs,jdk8u462-b08,apache-maven-3.6.1 \
 	http-request,kevinsawicki/http-request,2d62a3e9da726942a93cf16b6e91c0187e6c0136,lib,jdk8u462-b08,apache-maven-3.6.1 \
 	jhipster-registry,jhipster/jhipster-registry,00db36611da5fc7aaf9d5372aa90f2465d80c0c4,.,jdk8u462-b08,apache-maven-3.6.1 \
 	joda-time,JodaOrg/joda-time,d1ea2a53929d7d56d4f4560852e5586517a0dd47,.,jdk8u462-b08,apache-maven-3.6.1 \
@@ -121,17 +110,28 @@ run-tuscan-class-only-$(call experiment_id,$(1)): \
 	$(MAKE) -C $(call experiment_repodir,$(1))/$(call experiment_subdir,$(1)) tuscan-class-only
 
 
+# Tuscan Intra-Class execution section
+.PHONY: run-tuscan-intra-class-$(call experiment_id,$(1))
+run-tuscan-intra-class-$(call experiment_id,$(1)): \
+	$(call experiment_repodir,$(1))/$(call experiment_subdir,$(1))Makefile \
+	moira/util/build/libs/util.jar \
+	| $(call experiment_java,$(1)) \
+	$(call experiment_mvn,$(1))
+	$(MAKE) -C $(call experiment_repodir,$(1))/$(call experiment_subdir,$(1)) tuscan-intra-class
+
+
 # All targets section
 .PHONY: run-$(call experiment_id,$(1))
 run-$(call experiment_id,$(1)): \
 	run-plain-$(call experiment_id,$(1)) \
 	run-electric-test-$(call experiment_id,$(1))
 	run-tuscan-class-only-$(call experiment_id,$(1))
-
+	run-tuscan-intra-class-$(call experiment_id,$(1))
 
 run-plain: run-plain-$(call experiment_id,$(1))
 run-electric-test: run-electric-test-$(call experiment_id,$(1))
 run-tuscan-class-only: run-tuscan-class-only-$(call experiment_id,$(1))
+run-tuscan-intra-class: run-tuscan-intra-class-$(call experiment_id,$(1))
 
 
 # Statistics targets

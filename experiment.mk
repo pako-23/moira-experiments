@@ -4,13 +4,15 @@ timeout := 43200
 plain_files := $(foreach run,$(runs),run-$(run)/plain.txt)
 electric_test_files := $(foreach run,$(runs),run-$(run)/electric-test-conflicts.txt)
 tuscan_class_only_files := $(foreach run,$(runs),run-$(run)/tuscan-class-only-conflicts.txt)
+tuscan_intra_class_files := $(foreach run,$(runs),run-$(run)/tuscan-intra-class-conflicts.txt)
 
 
-all: plain electric-test tuscan-class-only
+all: plain electric-test tuscan-class-only tuscan-intra-class
 
 plain: $(plain_files)
 electric-test: $(electric_test_files)
 tuscan-class-only: $(tuscan_class_only_files)
+tuscan-intra-class: $(tuscan_intra_class_files)
 
 
 mvn_exec = JAVA_HOME=$(JAVA_HOME) $(MVN_BIN) $(1)
@@ -85,7 +87,20 @@ maven_test_execution_order cp.txt reference-output.csv test-execution-order enum
 	fi
 
 
-
+# Tuscan Intra-Class targets setup
+%tuscan-intra-class-conflicts.txt: testsuite classpath
+	mkdir -p $(dir $@); touch $@; \
+	if ! [ -f tuscan-intra-class-timed-out ]; then \
+		start_time="$$(date -u +%s)"; \
+		$(call java_exec,-cp $$(cat classpath):target/classes/:target/test-classes/:$(top_srcdir)/moira/util/build/libs/util.jar \
+			moira.util.cli.MoiraUtil tuscan --mode intra-class testsuite); \
+		if [ $$? -eq 124 ]; then \
+			touch tuscan-intra-class-timed-out; \
+		fi; \
+		echo "tuscan-intra-class: $$(expr "$$(date -u +%s)" - "$$start_time")" >> running-times; \
+	else \
+		echo "tuscan-intra-class: $(timeout)" >> running-times; \
+	fi
 
 
 %online-conflicts.txt: testsuite classpath
@@ -126,3 +141,4 @@ clean:
 	- rm -rf $(plain_files)
 	- rm -rf $(electric_test_files)
 	- rm -rf $(tuscan_class_only_files)
+	- rm -rf $(tuscan_intra_class_files)
