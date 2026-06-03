@@ -1,19 +1,19 @@
 EXPERIMENTS_DIR := experiments
 
-.PHONY: all
+.PHONY: all run-plain run-electric-test run-tuscan-class-only
 all: run-plain run-electric-test run-tuscan-class-only
-
-.PHONY: run-plain run-electric-test run-tuscan-class-only
 run-plain:
 run-electric-test:
 run-tuscan-class-only:
+
+.PHONY: plain-stats
+plain-stats:
 
 .PHONY: clean-experiments
 clean-experiments:
 
 SUBJECTS := aismessages,tbsalling/aismessages,7b0c4c708b6bb9a6da3d5737bcad1857ade8a931,.,jdk8u462-b08,apache-maven-3.6.1 \
 	c2mon-server-elasticsearch,c2mon/c2mon,d80687b119c713dd177a58cf53a997d8cc5ca264,c2mon-server/c2mon-server-elasticsearch,jdk8u462-b08,apache-maven-3.6.1 \
-	compute,vmware/admiral,e4b02936cc7d4ff2714e7231db0c4373ba5d48a2,compute,jdk8u462-b08,apache-maven-3.6.1 \
 	cukes-http,ctco/cukes,b483e1a8f261b80a66291a42fc455256b0b5059c,cukes-http,jdk8u462-b08,apache-maven-3.6.1 \
 	dropwizard-logging,dropwizard/dropwizard,07dfaed697427e208d65049f80a5d1949833b7cd,dropwizard-logging,jdk8u462-b08,apache-maven-3.6.1 \
 	dubbo-cluster,apache/dubbo,737f7a7ea67832d7f17517326fb2491d0a086dd7,dubbo-cluster,jdk8u462-b08,apache-maven-3.6.1 \
@@ -41,7 +41,7 @@ SUBJECTS := aismessages,tbsalling/aismessages,7b0c4c708b6bb9a6da3d5737bcad1857ad
 	request,vmware/admiral,e4b02936cc7d4ff2714e7231db0c4373ba5d48a2,request,jdk8u462-b08,apache-maven-3.6.1 \
 	riptide,zalando/riptide,8277e11fc069d8e24df0d233ef2577cc75659b75,riptide-spring-boot-starter,jdk8u462-b08,apache-maven-3.6.1 \
 	spring-boot,spring-projects/spring-boot,daa3d457b71896a758995c264977bdd1414ee4d4,spring-boot-project/spring-boot,jdk8u462-b08,apache-maven-3.6.1 \
-	spring-boot-actuator-autoconfigure,spring-projects/spring-boot daa3d457b71896a758995c264977bdd1414ee4d4,spring-boot-project/spring-boot-actuator-autoconfigure,jdk8u462-b08,apache-maven-3.6.1 \
+	spring-boot-actuator-autoconfigure,spring-projects/spring-boot,daa3d457b71896a758995c264977bdd1414ee4d4,spring-boot-project/spring-boot-actuator-autoconfigure,jdk8u462-b08,apache-maven-3.6.1 \
 	spring-boot-test,spring-projects/spring-boot,daa3d457b71896a758995c264977bdd1414ee4d4,spring-boot-project/spring-boot-test,jdk8u462-b08,apache-maven-3.6.1 \
 	spring-boot-test-autoconfigure,spring-projects/spring-boot,daa3d457b71896a758995c264977bdd1414ee4d4,spring-boot-project/spring-boot-test-autoconfigure,jdk8u462-b08,apache-maven-3.6.1 \
 	spring-data-ebean,hexagonframework/spring-data-ebean,dd11b97654982403b50dd1d5369cadad71fce410,.,jdk8u462-b08,apache-maven-3.6.1 \
@@ -134,6 +134,19 @@ run-electric-test: run-electric-test-$(call experiment_id,$(1))
 run-tuscan-class-only: run-tuscan-class-only-$(call experiment_id,$(1))
 
 
+# Statistics targets
+.PHONY: plain-stats-$(call experiment_id,$(1))
+plain-stats-$(call experiment_id,$(1)):
+	@echo "=== $(call experiment_id,$(1)) ==="
+	@if test -f $(call experiment_repodir,$(1))/$(call experiment_subdir,$(1))running-times; then \
+		echo "Execution Time: $$$$(grep -E '^plain: ' $(call experiment_repodir,$(1))/$(call experiment_subdir,$(1))running-times | awk '{print $$$$2}' | ./scripts/avgse.pl)"; \
+	else \
+		echo "No data found"; \
+	fi
+	@echo ""
+
+plain-stats: plain-stats-$(call experiment_id,$(1))
+
 # Cleanup targets section
 .PHONY: clean-$(word 1,$(subst $(comma), ,$(1)))
 clean-$(word 1,$(subst $(comma), ,$(1))):
@@ -144,21 +157,21 @@ clean-experiments: clean-$(word 1,$(subst $(comma), ,$(1)))
 endef
 
 $(EXPERIMENTS_DIR)-joda-time_REPO := 1
-$(EXPERIMENTS_DIR)/joda-time: | $(EXPERIMENTS_DIR)/apache-3.6.1 $(EXPERIMENTS_DIR)/jdk8u462-b08
+$(EXPERIMENTS_DIR)/joda-time: | $(EXPERIMENTS_DIR)/apache-maven-3.6.1 $(EXPERIMENTS_DIR)/jdk8u462-b08
 	git clone --quiet https://github.com/JodaOrg/joda-time $@ && \
 	cd $@ && git -c advice.detachedHead=false checkout d1ea2a53929d7d56d4f4560852e5586517a0dd47 && \
 	sed -i -e 's/3\.8\.2/4.13/' pom.xml
 	cd $@ && JAVA_HOME=$(PWD)/$(EXPERIMENTS_DIR)/jdk8u462-b08 $(PWD)/$(EXPERIMENTS_DIR)/apache-maven-3.6.1/bin/mvn install -DskipTests || true
 
 $(EXPERIMENTS_DIR)-riptide_REPO := 1
-$(EXPERIMENTS_DIR)/riptide: | $(EXPERIMENTS_DIR)/apache-3.6.1 $(EXPERIMENTS_DIR)/jdk8u462-b08
+$(EXPERIMENTS_DIR)/riptide: | $(EXPERIMENTS_DIR)/apache-maven-3.6.1 $(EXPERIMENTS_DIR)/jdk8u462-b08
 	git clone --quiet https://github.com/zalando/riptide $@ && \
 	cd $@ && git -c advice.detachedHead=false checkout 8277e11fc069d8e24df0d233ef2577cc75659b75 && \
 	sed -i '/<plugin>/,/<\/plugin>/{H; /<plugin>/h; /<\/plugin>/!d; x;/dependency-check-maven/d;}' pom.xml
 	cd $@ && JAVA_HOME=$(PWD)/$(EXPERIMENTS_DIR)/jdk8u462-b08 $(PWD)/$(EXPERIMENTS_DIR)/apache-maven-3.6.1/bin/mvn install -DskipTests || true
 
 $(EXPERIMENTS_DIR)-dropwizard_REPO := 1
-$(EXPERIMENTS_DIR)/dropwizard: | $(EXPERIMENTS_DIR)/apache-3.6.1 $(EXPERIMENTS_DIR)/jdk8u462-b08
+$(EXPERIMENTS_DIR)/dropwizard: | $(EXPERIMENTS_DIR)/apache-maven-3.6.1 $(EXPERIMENTS_DIR)/jdk8u462-b08
 	git clone --quiet https://github.com/dropwizard/dropwizard $@ && \
 	cd $@ && git -c advice.detachedHead=false checkout 07dfaed697427e208d65049f80a5d1949833b7cd && \
 	sed -i '/<plugin>/,/<\/plugin>/{H; /<plugin>/h; /<\/plugin>/!d; x;/dependency-check-maven/d;}' pom.xml
