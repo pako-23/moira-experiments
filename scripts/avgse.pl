@@ -14,10 +14,7 @@ while (<>) {
     $squared_sum += $_ * $_;
 }
 
-unless ($n == 10) {
-    print "Has $n runs\n";
-    exit;
-}
+exit unless ($n == 10);
 
 my $avg = $sum / $n;
 my $var = ($squared_sum - $sum * $sum / $n) / ($n - 1);

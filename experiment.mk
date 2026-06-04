@@ -34,10 +34,10 @@ testsuite:
 
 # Plain test suite execution targets
 %plain.txt: testsuite classpath
-	mkdir -p $(dir $@) ; \
-	start_time="$$(date -u +%s)" ; \
+	mkdir -p $(dir $@); \
+	start_time="$$(date -u +%s)"; \
 	$(call java_exec,-cp $$(cat classpath):target/classes/:target/test-classes/ \
-		org.junit.runner.JUnitCore $$(cat testsuite | tr '\n' ' ')) > $@ && \
+		org.junit.runner.JUnitCore $$(cat testsuite | tr '\n' ' ')) > $@; \
 	echo "plain: $$(expr "$$(date -u +%s)" - "$$start_time")" >> running-times
 
 
@@ -77,7 +77,7 @@ maven_test_execution_order cp.txt reference-output.csv test-execution-order enum
 	if ! [ -f tuscan-class-only-timed-out ]; then \
 		start_time="$$(date -u +%s)"; \
 		$(call java_exec,-cp $$(cat classpath):target/classes/:target/test-classes/:$(top_srcdir)/moira/util/build/libs/util.jar \
-			moira.util.cli.MoiraUtil tuscan --mode class-only testsuite); \
+			moira.util.cli.MoiraUtil tuscan --mode class-only testsuite > $@); \
 		if [ $$? -eq 124 ]; then \
 			touch tuscan-class-only-timed-out; \
 		fi; \
@@ -93,7 +93,7 @@ maven_test_execution_order cp.txt reference-output.csv test-execution-order enum
 	if ! [ -f tuscan-intra-class-timed-out ]; then \
 		start_time="$$(date -u +%s)"; \
 		$(call java_exec,-cp $$(cat classpath):target/classes/:target/test-classes/:$(top_srcdir)/moira/util/build/libs/util.jar \
-			moira.util.cli.MoiraUtil tuscan --mode intra-class testsuite); \
+			moira.util.cli.MoiraUtil tuscan --mode intra-class testsuite > $@); \
 		if [ $$? -eq 124 ]; then \
 			touch tuscan-intra-class-timed-out; \
 		fi; \
