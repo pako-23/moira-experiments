@@ -56,6 +56,10 @@ experiment_subdir = $(if $(filter .,$(word 4,$(subst $(comma), ,$(1)))),,$(word 
 experiment_java = $(EXPERIMENTS_DIR)/$(word 5,$(subst $(comma), ,$(1)))
 experiment_mvn = $(EXPERIMENTS_DIR)/$(word 6,$(subst $(comma), ,$(1)))
 
+execution_time = echo "Execution Time: $$$$(./scripts/running-times.pl $(1) $(2) | ./scripts/avgse.pl | ./scripts/display.pl)"
+pairs_found = if test -d $(1); then echo "Pairs Found: $$$$(find $(1) -name $(2)-conflicts.txt -exec wc -l {} \; | awk '{print $$$$1}' | ./scripts/avgse.pl | ./scripts/display.pl)"; else echo "Pairs Found: N/A"; fi
+flaky_tests = if test -d $(1); then echo "Flaky Tests: $$$$(find $(1) -name $(2)-conflicts.txt -exec ./scripts/flaky-tests.pl {} \; | ./scripts/avgse.pl | ./scripts/display.pl)"; else echo "Flaky Tests: N/A"; fi
+
 define experiment =
 
 # Repository setup section
@@ -141,43 +145,41 @@ run-tuscan-intra-class: run-tuscan-intra-class-$(call experiment_id,$(1))
 .PHONY: plain-stats-$(call experiment_id,$(1))
 plain-stats-$(call experiment_id,$(1)):
 	@echo "=== $(call experiment_id,$(1)) ==="
-	@echo "Execution Time: $$$$(./scripts/running-times.pl $(call experiment_repodir,$(1))/$(call experiment_subdir,$(1)) plain | ./scripts/avgse.pl | ./scripts/display.pl)"
+	@$(call execution_time,$(call experiment_repodir,$(1))/$(call experiment_subdir,$(1)),plain)
 	@echo ""
 
 plain-stats: plain-stats-$(call experiment_id,$(1))
 
 
 .PHONY: electric-test-stats-$(call experiment_id,$(1))
-electric-test-stats-$(call experiment_id,$(1)): $(call experiment_repodir,$(1))/$(call experiment_subdir,$(1))Makefile
+electric-test-stats-$(call experiment_id,$(1)):
 	@echo "=== $(call experiment_id,$(1)) ==="
-	@echo "Execution Time: $$$$(./scripts/running-times.pl $(call experiment_repodir,$(1))/$(call experiment_subdir,$(1)) electric-test | ./scripts/avgse.pl  | ./scripts/display.pl)"
+	@$(call execution_time,$(call experiment_repodir,$(1))/$(call experiment_subdir,$(1)),electric-test)
 	@echo "Setup Execution Time: $$$$(./scripts/running-times.pl $(call experiment_repodir,$(1))/$(call experiment_subdir,$(1)) electric-test-setup  | ./scripts/display.pl)"
-	@echo "Pairs Found: $$$$(find $(call experiment_repodir,$(1))/$(call experiment_subdir,$(1)) -name electric-test-conflicts.txt -exec wc -l {} \; | awk '{print $$$$1}' | ./scripts/avgse.pl | ./scripts/display.pl)"
-	@echo "Flaky Tests: $$$$(find $(call experiment_repodir,$(1))/$(call experiment_subdir,$(1)) -name electric-test-conflicts.txt -exec ./scripts/flaky-tests.pl {} \; | ./scripts/avgse.pl | ./scripts/display.pl)"
+	@$(call pairs_found,$(call experiment_repodir,$(1))/$(call experiment_subdir,$(1)),electric-test)
+	@$(call flaky_tests,$(call experiment_repodir,$(1))/$(call experiment_subdir,$(1)),electric-test)
 	@echo ""
 
 electric-test-stats: electric-test-stats-$(call experiment_id,$(1))
 
 
 .PHONY: tuscan-class-only-stats-$(call experiment_id,$(1))
-tuscan-class-only-stats-$(call experiment_id,$(1)): $(call experiment_repodir,$(1))/$(call experiment_subdir,$(1))Makefile
+tuscan-class-only-stats-$(call experiment_id,$(1)):
 	@echo "=== $(call experiment_id,$(1)) ==="
-	@echo "Execution Time: $$$$(./scripts/running-times.pl $(call experiment_repodir,$(1))/$(call experiment_subdir,$(1)) tuscan-class-only | ./scripts/avgse.pl  | ./scripts/display.pl)"
-	@echo "Setup Execution Time: $$$$(./scripts/running-times.pl $(call experiment_repodir,$(1))/$(call experiment_subdir,$(1)) tuscan-class-only-setup  | ./scripts/display.pl)"
-	@echo "Pairs Found: $$$$(find $(call experiment_repodir,$(1))/$(call experiment_subdir,$(1)) -name tuscan-class-only-conflicts.txt -exec wc -l {} \; | awk '{print $$$$1}' | ./scripts/avgse.pl | ./scripts/display.pl)"
-	@echo "Flaky Tests: $$$$(find $(call experiment_repodir,$(1))/$(call experiment_subdir,$(1)) -name tuscan-class-only-conflicts.txt -exec ./scripts/flaky-tests.pl {} \; | ./scripts/avgse.pl | ./scripts/display.pl)"
+	@$(call execution_time,$(call experiment_repodir,$(1))/$(call experiment_subdir,$(1)),tuscan-class-only)
+	@$(call pairs_found,$(call experiment_repodir,$(1))/$(call experiment_subdir,$(1)),tuscan-class-only)
+	@$(call flaky_tests,$(call experiment_repodir,$(1))/$(call experiment_subdir,$(1)),tuscan-class-only)
 	@echo ""
 
 tuscan-class-only-stats: tuscan-class-only-stats-$(call experiment_id,$(1))
 
 
 .PHONY: tuscan-intra-class-stats-$(call experiment_id,$(1))
-tuscan-intra-class-stats-$(call experiment_id,$(1)): $(call experiment_repodir,$(1))/$(call experiment_subdir,$(1))Makefile
+tuscan-intra-class-stats-$(call experiment_id,$(1)):
 	@echo "=== $(call experiment_id,$(1)) ==="
-	@echo "Execution Time: $$$$(./scripts/running-times.pl $(call experiment_repodir,$(1))/$(call experiment_subdir,$(1)) tuscan-intra-class | ./scripts/avgse.pl  | ./scripts/display.pl)"
-	@echo "Setup Execution Time: $$$$(./scripts/running-times.pl $(call experiment_repodir,$(1))/$(call experiment_subdir,$(1)) tuscan-intra-class-setup  | ./scripts/display.pl)"
-	@echo "Pairs Found: $$$$(find $(call experiment_repodir,$(1))/$(call experiment_subdir,$(1)) -name tuscan-intra-class-conflicts.txt -exec wc -l {} \; | awk '{print $$$$1}' | ./scripts/avgse.pl | ./scripts/display.pl)"
-	@echo "Flaky Tests: $$$$(find $(call experiment_repodir,$(1))/$(call experiment_subdir,$(1)) -name tuscan-intra-class-conflicts.txt -exec ./scripts/flaky-tests.pl {} \; | ./scripts/avgse.pl | ./scripts/display.pl)"
+	@$(call execution_time,$(call experiment_repodir,$(1))/$(call experiment_subdir,$(1)),tuscan-intra-class)
+	@$(call pairs_found,$(call experiment_repodir,$(1))/$(call experiment_subdir,$(1)),tuscan-intra-class)
+	@$(call flaky_tests,$(call experiment_repodir,$(1))/$(call experiment_subdir,$(1)),tuscan-intra-class)
 	@echo ""
 
 tuscan-intra-class-stats: tuscan-intra-class-stats-$(call experiment_id,$(1))
