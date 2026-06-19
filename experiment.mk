@@ -78,7 +78,7 @@ maven_test_execution_order cp.txt reference-output.csv test-execution-order enum
 		start_time="$$(date -u +%s)"; \
 		$(call java_exec,-jar $(top_srcdir)/moira/util/build/libs/util.jar tuscan \
 			-app-cp $$(cat classpath):target/classes/:target/test-classes/ \
-			--mode class-only -p 1 testsuite > $@ 2> $*/tuscan-class-only-progress.txt); \
+			--mode class-only -p 1 testsuite > $@ 2> $*tuscan-class-only-progress.txt); \
 		if [ $$? -eq 124 ]; then \
 			touch tuscan-class-only-timed-out; \
 		fi; \
