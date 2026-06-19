@@ -16,7 +16,8 @@ tuscan-intra-class-stats:
 .PHONY: clean-experiments
 clean-experiments:
 
-SUBJECTS := aismessages,tbsalling/aismessages,7b0c4c708b6bb9a6da3d5737bcad1857ade8a931,.,jdk8u462-b08,apache-maven-3.6.1 \
+SUBJECTS := \
+	aismessages,tbsalling/aismessages,7b0c4c708b6bb9a6da3d5737bcad1857ade8a931,.,jdk8u462-b08,apache-maven-3.6.1 \
 	c2mon-server-elasticsearch,c2mon/c2mon,d80687b119c713dd177a58cf53a997d8cc5ca264,c2mon-server/c2mon-server-elasticsearch,jdk8u462-b08,apache-maven-3.6.1 \
 	cukes-http,ctco/cukes,b483e1a8f261b80a66291a42fc455256b0b5059c,cukes-http,jdk8u462-b08,apache-maven-3.6.1 \
 	dropwizard-logging,dropwizard/dropwizard,07dfaed697427e208d65049f80a5d1949833b7cd,dropwizard-logging,jdk8u462-b08,apache-maven-3.6.1 \
