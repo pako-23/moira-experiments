@@ -1,11 +1,18 @@
 EXPERIMENTS_DIR := experiments
 
-.PHONY: all run-plain run-electric-test run-tuscan-class-only run-tuscan-intra-class
-all: run-plain run-electric-test run-tuscan-class-only run-tuscan-intra-class
+.PHONY: all run-plain run-electric-test run-tuscan-class-only \
+	run-tuscan-intra-class run-tuscan-inter-class \
+	run-tuscan-packed
+all: run-plain run-electric-test run-tuscan-class-only \
+	run-tuscan-intra-class run-tuscan-inter-class \
+	run-tuscan-packed
+
 run-plain:
 run-electric-test:
 run-tuscan-class-only:
 run-tuscan-intra-class:
+run-tuscan-inter-class:
+run-tuscan-packed:
 
 .PHONY: plain-stats electric-test-stats tuscan-class-only-stats tuscan-intra-class-stats
 plain-stats:
@@ -127,6 +134,23 @@ run-tuscan-intra-class-$(call experiment_id,$(1)): \
 	$(call experiment_mvn,$(1))
 	$(MAKE) -C $(call experiment_repodir,$(1))/$(call experiment_subdir,$(1)) tuscan-intra-class
 
+# Tuscan Inter-Class execution section
+.PHONY: run-tuscan-inter-class-$(call experiment_id,$(1))
+run-tuscan-inter-class-$(call experiment_id,$(1)): \
+	$(call experiment_repodir,$(1))/$(call experiment_subdir,$(1))Makefile \
+	moira/util/build/libs/util.jar \
+	| $(call experiment_java,$(1)) \
+	$(call experiment_mvn,$(1))
+	$(MAKE) -C $(call experiment_repodir,$(1))/$(call experiment_subdir,$(1)) tuscan-inter-class
+
+# Tuscan Packed execution section
+.PHONY: run-tuscan-packed-$(call experiment_id,$(1))
+run-tuscan-packed-$(call experiment_id,$(1)): \
+	$(call experiment_repodir,$(1))/$(call experiment_subdir,$(1))Makefile \
+	moira/util/build/libs/util.jar \
+	| $(call experiment_java,$(1)) \
+	$(call experiment_mvn,$(1))
+	$(MAKE) -C $(call experiment_repodir,$(1))/$(call experiment_subdir,$(1)) tuscan-packed
 
 # All targets section
 .PHONY: run-$(call experiment_id,$(1))
@@ -140,6 +164,8 @@ run-plain: run-plain-$(call experiment_id,$(1))
 run-electric-test: run-electric-test-$(call experiment_id,$(1))
 run-tuscan-class-only: run-tuscan-class-only-$(call experiment_id,$(1))
 run-tuscan-intra-class: run-tuscan-intra-class-$(call experiment_id,$(1))
+run-tuscan-inter-class: run-tuscan-inter-class-$(call experiment_id,$(1))
+run-tuscan-packed: run-tuscan-packed-$(call experiment_id,$(1))
 
 
 # Statistics targets

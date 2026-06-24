@@ -5,14 +5,18 @@ plain_files := $(foreach run,$(runs),run-$(run)/plain.txt)
 electric_test_files := $(foreach run,$(runs),run-$(run)/electric-test-conflicts.txt)
 tuscan_class_only_files := $(foreach run,$(runs),run-$(run)/tuscan-class-only-conflicts.txt)
 tuscan_intra_class_files := $(foreach run,$(runs),run-$(run)/tuscan-intra-class-conflicts.txt)
+tuscan_inter_class_files := $(foreach run,$(runs),run-$(run)/tuscan-inter-class-conflicts.txt)
+tuscan_packed_files := $(foreach run,$(runs),run-$(run)/tuscan-packed-conflicts.txt)
 
 
-all: plain electric-test tuscan-class-only tuscan-intra-class
+all: plain electric-test tuscan-class-only tuscan-intra-class tuscan-inter-class tuscan-packed
 
 plain: $(plain_files)
 electric-test: $(electric_test_files)
 tuscan-class-only: $(tuscan_class_only_files)
 tuscan-intra-class: $(tuscan_intra_class_files)
+tuscan-inter-class: $(tuscan_inter_class_files)
+tuscan-packed: $(tuscan_packed_files)
 
 
 mvn_exec = JAVA_HOME=$(JAVA_HOME) $(MVN_BIN) $(1)
@@ -93,8 +97,9 @@ maven_test_execution_order cp.txt reference-output.csv test-execution-order enum
 	mkdir -p $(dir $@); touch $@; \
 	if ! [ -f tuscan-intra-class-timed-out ]; then \
 		start_time="$$(date -u +%s)"; \
-		$(call java_exec,-cp $$(cat classpath):target/classes/:target/test-classes/:$(top_srcdir)/moira/util/build/libs/util.jar \
-			moira.util.cli.MoiraUtil tuscan --mode intra-class testsuite > $@); \
+		$(call java_exec,-jar $(top_srcdir)/moira/util/build/libs/util.jar tuscan \
+			-app-cp $$(cat classpath):target/classes/:target/test-classes/ \
+			-mode intra-class -p 1 testsuite > $@ 2> $*tuscan-intra-class-progress.txt); \
 		if [ $$? -eq 124 ]; then \
 			touch tuscan-intra-class-timed-out; \
 		fi; \
@@ -103,6 +108,37 @@ maven_test_execution_order cp.txt reference-output.csv test-execution-order enum
 		echo "tuscan-intra-class: $(timeout)" >> running-times; \
 	fi
 
+# Tuscan Inter-Class targets setup
+%tuscan-inter-class-conflicts.txt: testsuite classpath
+	mkdir -p $(dir $@); touch $@; \
+	if ! [ -f tuscan-inter-class-timed-out ]; then \
+		start_time="$$(date -u +%s)"; \
+		$(call java_exec,-jar $(top_srcdir)/moira/util/build/libs/util.jar tuscan \
+			-app-cp $$(cat classpath):target/classes/:target/test-classes/ \
+			-mode inter-class -p 1 testsuite > $@ 2> $*tuscan-inter-class-progress.txt); \
+		if [ $$? -eq 124 ]; then \
+			touch tuscan-inter-class-timed-out; \
+		fi; \
+		echo "tuscan-inter-class: $$(expr "$$(date -u +%s)" - "$$start_time")" >> running-times; \
+	else \
+		echo "tuscan-inter-class: $(timeout)" >> running-times; \
+	fi
+
+# Tuscan Packed targets setup
+%tuscan-packed-conflicts.txt: testsuite classpath
+	mkdir -p $(dir $@); touch $@; \
+	if ! [ -f tuscan-packed-timed-out ]; then \
+		start_time="$$(date -u +%s)"; \
+		$(call java_exec,-jar $(top_srcdir)/moira/util/build/libs/util.jar tuscan \
+			-app-cp $$(cat classpath):target/classes/:target/test-classes/ \
+			-mode packed -p 1 testsuite > $@ 2> $*tuscan-packed-progress.txt); \
+		if [ $$? -eq 124 ]; then \
+			touch tuscan-packed-timed-out; \
+		fi; \
+		echo "tuscan-packed: $$(expr "$$(date -u +%s)" - "$$start_time")" >> running-times; \
+	else \
+		echo "tuscan-packed: $(timeout)" >> running-times; \
+	fi
 
 %online-conflicts.txt: testsuite classpath
 	mkdir -p $(dir $@) ; \
@@ -143,3 +179,5 @@ clean:
 	- rm -rf $(electric_test_files)
 	- rm -rf $(tuscan_class_only_files)
 	- rm -rf $(tuscan_intra_class_files)
+	- rm -rf $(tuscan_inter_class_files)
+	- rm -rf $(tuscan_packed_files)
