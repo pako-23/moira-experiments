@@ -2,10 +2,10 @@ EXPERIMENTS_DIR := experiments
 
 .PHONY: all run-plain run-electric-test run-tuscan-class-only \
 	run-tuscan-intra-class run-tuscan-inter-class \
-	run-tuscan-packed
+	run-tuscan-packed run-target-pairs run-moira
 all: run-plain run-electric-test run-tuscan-class-only \
 	run-tuscan-intra-class run-tuscan-inter-class \
-	run-tuscan-packed
+	run-tuscan-packed run-target-pairs run-moira
 
 run-plain:
 run-electric-test:
@@ -13,6 +13,8 @@ run-tuscan-class-only:
 run-tuscan-intra-class:
 run-tuscan-inter-class:
 run-tuscan-packed:
+run-target-pairs:
+run-moira:
 
 .PHONY: plain-stats electric-test-stats tuscan-class-only-stats tuscan-intra-class-stats
 plain-stats:
@@ -68,6 +70,21 @@ execution_time = echo "Execution Time: $$$$(./scripts/running-times.pl $(1) $(2)
 pairs_found = if test -d $(1); then echo "Pairs Found: $$$$(find $(1) -name $(2)-conflicts.txt -exec wc -l {} \; | awk '{print $$$$1}' | ./scripts/avgse.pl | ./scripts/display.pl)"; else echo "Pairs Found: N/A"; fi
 flaky_tests = if test -d $(1); then echo "Flaky Tests: $$$$(find $(1) -name $(2)-conflicts.txt -exec ./scripts/flaky-tests.pl {} \; | ./scripts/avgse.pl | ./scripts/display.pl)"; else echo "Flaky Tests: N/A"; fi
 
+define experiment_method =
+.PHONY: run-$(1)-$(call experiment_id,$(2))
+run-$(1)-$(call experiment_id,$(2)): \
+	$(call experiment_repodir,$(2))/$(call experiment_subdir,$(2))Makefile \
+	moira/agent/build/libs/agent.jar \
+	moira/moira/build/libs/moira.jar \
+	moira/util/build/libs/util.jar \
+	| $(call experiment_java,$(2)) \
+	$(call experiment_mvn,$(2))
+	$(MAKE) -C $(call experiment_repodir,$(2))/$(call experiment_subdir,$(2)) $(1)
+
+run-$(1): run-$(1)-$(call experiment_id,$(2))
+run-$(call experiment_id,$(2)): run-$(1)-$(call experiment_id,$(2))
+endef
+
 define experiment =
 
 # Repository setup section
@@ -95,6 +112,9 @@ $(call experiment_repodir,$(1))/$(call experiment_subdir,$(1))Makefile: | $(call
 	@printf "MVN_HOME = $(PWD)/$(call experiment_mvn,$(1))\n" >> $$@
 	@printf "include $(PWD)/experiment.mk\n" >> $$@
 
+.PHONY: run-$(call experiment_id,$(1))
+run-$(call experiment_id,$(1)):
+
 
 # Plain execution section
 .PHONY: run-plain-$(call experiment_id,$(1))
@@ -104,6 +124,8 @@ run-plain-$(call experiment_id,$(1)): \
 	$(call experiment_mvn,$(1))
 	$(MAKE) -C $(call experiment_repodir,$(1))/$(call experiment_subdir,$(1)) plain
 
+run-plain: run-plain-$(call experiment_id,$(1))
+run-$(call experiment_id,$(1)): run-plain-$(call experiment_id,$(1))
 
 # ElectricTest execution section
 .PHONY: run-electric-test-$(call experiment_id,$(1))
@@ -114,58 +136,16 @@ run-electric-test-$(call experiment_id,$(1)): \
 	$(call experiment_mvn,$(1))
 	$(MAKE) -C $(call experiment_repodir,$(1))/$(call experiment_subdir,$(1)) electric-test
 
-
-# Tuscan Class-Only execution section
-.PHONY: run-tuscan-class-only-$(call experiment_id,$(1))
-run-tuscan-class-only-$(call experiment_id,$(1)): \
-	$(call experiment_repodir,$(1))/$(call experiment_subdir,$(1))Makefile \
-	moira/util/build/libs/util.jar \
-	| $(call experiment_java,$(1)) \
-	$(call experiment_mvn,$(1))
-	$(MAKE) -C $(call experiment_repodir,$(1))/$(call experiment_subdir,$(1)) tuscan-class-only
-
-
-# Tuscan Intra-Class execution section
-.PHONY: run-tuscan-intra-class-$(call experiment_id,$(1))
-run-tuscan-intra-class-$(call experiment_id,$(1)): \
-	$(call experiment_repodir,$(1))/$(call experiment_subdir,$(1))Makefile \
-	moira/util/build/libs/util.jar \
-	| $(call experiment_java,$(1)) \
-	$(call experiment_mvn,$(1))
-	$(MAKE) -C $(call experiment_repodir,$(1))/$(call experiment_subdir,$(1)) tuscan-intra-class
-
-# Tuscan Inter-Class execution section
-.PHONY: run-tuscan-inter-class-$(call experiment_id,$(1))
-run-tuscan-inter-class-$(call experiment_id,$(1)): \
-	$(call experiment_repodir,$(1))/$(call experiment_subdir,$(1))Makefile \
-	moira/util/build/libs/util.jar \
-	| $(call experiment_java,$(1)) \
-	$(call experiment_mvn,$(1))
-	$(MAKE) -C $(call experiment_repodir,$(1))/$(call experiment_subdir,$(1)) tuscan-inter-class
-
-# Tuscan Packed execution section
-.PHONY: run-tuscan-packed-$(call experiment_id,$(1))
-run-tuscan-packed-$(call experiment_id,$(1)): \
-	$(call experiment_repodir,$(1))/$(call experiment_subdir,$(1))Makefile \
-	moira/util/build/libs/util.jar \
-	| $(call experiment_java,$(1)) \
-	$(call experiment_mvn,$(1))
-	$(MAKE) -C $(call experiment_repodir,$(1))/$(call experiment_subdir,$(1)) tuscan-packed
-
-# All targets section
-.PHONY: run-$(call experiment_id,$(1))
-run-$(call experiment_id,$(1)): \
-	run-plain-$(call experiment_id,$(1)) \
-	run-electric-test-$(call experiment_id,$(1))
-	run-tuscan-class-only-$(call experiment_id,$(1))
-	run-tuscan-intra-class-$(call experiment_id,$(1))
-
-run-plain: run-plain-$(call experiment_id,$(1))
 run-electric-test: run-electric-test-$(call experiment_id,$(1))
-run-tuscan-class-only: run-tuscan-class-only-$(call experiment_id,$(1))
-run-tuscan-intra-class: run-tuscan-intra-class-$(call experiment_id,$(1))
-run-tuscan-inter-class: run-tuscan-inter-class-$(call experiment_id,$(1))
-run-tuscan-packed: run-tuscan-packed-$(call experiment_id,$(1))
+run-$(call experiment_id,$(1)): run-electric-test-$(call experiment_id,$(1))
+
+
+$(eval $(call experiment_method,tuscan-class-only,$(1)))
+$(eval $(call experiment_method,tuscan-intra-class,$(1)))
+$(eval $(call experiment_method,tuscan-inter-class,$(1)))
+$(eval $(call experiment_method,tuscan-packed,$(1)))
+$(eval $(call experiment_method,target-pairs,$(1)))
+$(eval $(call experiment_method,moira,$(1)))
 
 
 # Statistics targets

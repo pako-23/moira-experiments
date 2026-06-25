@@ -7,9 +7,12 @@ tuscan_class_only_files := $(foreach run,$(runs),run-$(run)/tuscan-class-only-co
 tuscan_intra_class_files := $(foreach run,$(runs),run-$(run)/tuscan-intra-class-conflicts.txt)
 tuscan_inter_class_files := $(foreach run,$(runs),run-$(run)/tuscan-inter-class-conflicts.txt)
 tuscan_packed_files := $(foreach run,$(runs),run-$(run)/tuscan-packed-conflicts.txt)
+target_pairs_files := $(foreach run,$(runs),run-$(run)/target-pairs-conflicts.txt)
+moira_files := $(foreach run,$(runs),run-$(run)/moira-conflicts.txt)
 
 
-all: plain electric-test tuscan-class-only tuscan-intra-class tuscan-inter-class tuscan-packed
+all: plain electric-test tuscan-class-only tuscan-intra-class tuscan-inter-class \
+	tuscan-packed target-pairs moira
 
 plain: $(plain_files)
 electric-test: $(electric_test_files)
@@ -17,6 +20,8 @@ tuscan-class-only: $(tuscan_class_only_files)
 tuscan-intra-class: $(tuscan_intra_class_files)
 tuscan-inter-class: $(tuscan_inter_class_files)
 tuscan-packed: $(tuscan_packed_files)
+target-pairs: $(target_pairs_files)
+moira: $(moira_files)
 
 
 mvn_exec = JAVA_HOME=$(JAVA_HOME) $(MVN_BIN) $(1)
@@ -140,7 +145,52 @@ maven_test_execution_order cp.txt reference-output.csv test-execution-order enum
 		echo "tuscan-packed: $(timeout)" >> running-times; \
 	fi
 
-%online-conflicts.txt: testsuite classpath
+# Target Pairs targets setup
+%target-pairs-conflicts.txt: %target-pairs-profiler-conflicts.txt
+	mkdir -p $(dir $@); touch $@; \
+	if ! [ -f target-pairs-timed-out ]; then \
+		start_time="$$(date -u +%s)"; \
+		$(call java_exec,-jar $(top_srcdir)/moira/util/build/libs/util.jar tuscan \
+			-app-cp $$(cat classpath):target/classes/:target/test-classes/ \
+			-mode target-pairs -p 1 $*target-pairs-profiler-conflicts.txt > $@ 2> $*target-pairs-progress.txt); \
+		if [ $$? -eq 124 ]; then \
+			touch target-pairs-timed-out; \
+		fi; \
+		echo "target-pairs: $$(expr "$$(date -u +%s)" - "$$start_time")" >> running-times; \
+	else \
+		echo "target-pairs: $(timeout)" >> running-times; \
+	fi
+
+%target-pairs-profiler-conflicts.txt: testsuite classpath
+	mkdir -p $(dir $@) ; \
+	start_time="$$(date -u +%s)" ; \
+	$(call java_exec,-cp $$(cat classpath):target/classes/:target/test-classes/:$(top_srcdir)/moira/moira/build/libs/moira.jar \
+		-javaagent:$(top_srcdir)/moira/agent/build/libs/agent.jar \
+		-Xbootclasspath/a:$(top_srcdir)/moira/agent/build/libs/agent.jar \
+		-Dmoira.profiler.name=TargetPairsProfiler \
+		-Dmoira.profiler.filename=$@ \
+		-Dmoira.agent.filter=java/ \
+		-Dmoira.agent.suspend='' \
+		moira.Moira testsuite) && \
+	echo "target-pairs-profiler: $$(expr "$$(date -u +%s)" - "$$start_time")" >> running-times
+
+# Moira targets setup
+%moira-conflicts.txt: %online-profiler-conflicts.txt
+	mkdir -p $(dir $@); touch $@; \
+	if ! [ -f moira-timed-out ]; then \
+		start_time="$$(date -u +%s)"; \
+		$(call java_exec,-jar $(top_srcdir)/moira/util/build/libs/util.jar tuscan \
+			-app-cp $$(cat classpath):target/classes/:target/test-classes/ \
+			-mode pair-cover -p 1 $*online-profiler-conflicts.txt > $@ 2> $*moira-progress.txt); \
+		if [ $$? -eq 124 ]; then \
+			touch moira-timed-out; \
+		fi; \
+		echo "moira: $$(expr "$$(date -u +%s)" - "$$start_time")" >> running-times; \
+	else \
+		echo "moira: $(timeout)" >> running-times; \
+	fi
+
+%online-profiler-conflicts.txt: testsuite classpath
 	mkdir -p $(dir $@) ; \
 	start_time="$$(date -u +%s)" ; \
 	$(call java_exec,-cp $$(cat classpath):target/classes/:target/test-classes/:$(top_srcdir)/moira/moira/build/libs/moira.jar \
@@ -175,9 +225,5 @@ maven_test_execution_order cp.txt reference-output.csv test-execution-order enum
 .PHONY: clean
 clean:
 	- rm -f running-times
-	- rm -rf $(plain_files)
-	- rm -rf $(electric_test_files)
-	- rm -rf $(tuscan_class_only_files)
-	- rm -rf $(tuscan_intra_class_files)
-	- rm -rf $(tuscan_inter_class_files)
-	- rm -rf $(tuscan_packed_files)
+	- rm -rf $(foreach run,$(runs),run-$(run))
+	- rm -f $(foreach exp,electric-test tuscan-class-only tuscan-intra-class tuscan-inter-class tuscan-packed target-pairs moira,$(exp)-timed-out)
