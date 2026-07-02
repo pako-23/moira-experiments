@@ -39,7 +39,7 @@ classpath: testsuite
 
 testsuite:
 	$(call mvn_exec,test) || true
-	@find target/ -name 'TEST*.xml' -print0 | xargs -0 sed -n -e 's/^<testsuite .* name="\([^"]*\)".*$$/\1/p' | sort -u > testsuite
+	@find target/ -name 'TEST-*.xml' | sed 's/.*TEST-\(.*\)\.xml/\1/' > testsuite
 
 # Plain test suite execution targets
 %plain.txt: testsuite classpath
@@ -174,6 +174,8 @@ maven_test_execution_order cp.txt reference-output.csv test-execution-order enum
 		moira.Moira testsuite) && \
 	echo "target-pairs-profiler: $$(expr "$$(date -u +%s)" - "$$start_time")" >> running-times
 
+.SECONDARY: $(foreach run,$(runs),run-$(run)/target-pairs-profiler-conflicts.txt)
+
 # Moira targets setup
 %moira-conflicts.txt: %online-profiler-conflicts.txt
 	mkdir -p $(dir $@); touch $@; \
@@ -200,6 +202,8 @@ maven_test_execution_order cp.txt reference-output.csv test-execution-order enum
 		-Dmoira.profiler.filename=$@ \
 		moira.Moira testsuite) && \
 	echo "online-profiler: $$(expr "$$(date -u +%s)" - "$$start_time")" >> running-times
+
+.SECONDARY: $(foreach run,$(runs),run-$(run)/online-profiler-conflicts.txt)
 
 %-verified.txt: %-conflicts.txt
 	touch $@; \
