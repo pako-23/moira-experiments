@@ -30,6 +30,8 @@ SUBJECTS := \
 	wro4j-core,wro4j/wro4j,185ab607f1d649ca38b4a772831ee754cd4649fb,wro4j-core,jdk8u462-b08,apache-maven-3.6.1
 
 
+TESTSUITE_FILTER_fastjson := com.alibaba.json.bvt.support.jaxrs.mock.testcase.FastJsonProviderTest
+
 EXPERIMENTS_DIR := experiments
 comma := ,
 experiment_id = $(word 1,$(subst $(comma), ,$(1)))

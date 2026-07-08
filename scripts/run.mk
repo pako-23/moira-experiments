@@ -52,6 +52,7 @@ $(call experiment_repodir,$(1))/$(call experiment_subdir,$(1))Makefile: | $(call
 		printf "MVN_BIN = $(PWD)/$(call experiment_mvn,$(1))/bin/mvn\n" >> $$@; \
 	fi
 	@printf "MVN_HOME = $(PWD)/$(call experiment_mvn,$(1))\n" >> $$@
+	@printf "TESTSUITE_FILTER = $(TESTSUITE_FILTER_$(call experiment_id,$(1)))\n" >> $$@
 	@printf "include $(PWD)/scripts/experiment.mk\n" >> $$@
 
 .PHONY: run-$(call experiment_id,$(1))

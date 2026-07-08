@@ -40,6 +40,9 @@ classpath: testsuite
 testsuite:
 	$(call mvn_exec,test) || true
 	@find target/ -name 'TEST-*.xml' | sed 's/.*TEST-\(.*\)\.xml/\1/' > testsuite
+	@for class in $(TESTSUITE_FILTER); do \
+		sed -i "/$$class/d" testsuite; \
+	done
 
 # Plain test suite execution targets
 %plain.txt: testsuite classpath
