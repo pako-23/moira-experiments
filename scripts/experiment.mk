@@ -90,7 +90,7 @@ maven_test_execution_order cp.txt reference-output.csv test-execution-order enum
 		start_time="$$(date -u +%s)"; \
 		$(call java_exec,-jar $(top_srcdir)/moira/util/build/libs/util.jar tuscan \
 			-app-cp $$(cat classpath):target/classes/:target/test-classes/ \
-			-mode class-only -p 1 testsuite > $@ 2> $*tuscan-class-only-progress.txt); \
+			-mode class-only testsuite > $@ 2> $*tuscan-class-only-progress.txt); \
 		if [ $$? -eq 124 ]; then \
 			touch tuscan-class-only-timed-out; \
 		fi; \
@@ -107,7 +107,7 @@ maven_test_execution_order cp.txt reference-output.csv test-execution-order enum
 		start_time="$$(date -u +%s)"; \
 		$(call java_exec,-jar $(top_srcdir)/moira/util/build/libs/util.jar tuscan \
 			-app-cp $$(cat classpath):target/classes/:target/test-classes/ \
-			-mode intra-class -p 1 testsuite > $@ 2> $*tuscan-intra-class-progress.txt); \
+			-mode intra-class testsuite > $@ 2> $*tuscan-intra-class-progress.txt); \
 		if [ $$? -eq 124 ]; then \
 			touch tuscan-intra-class-timed-out; \
 		fi; \
@@ -123,7 +123,7 @@ maven_test_execution_order cp.txt reference-output.csv test-execution-order enum
 		start_time="$$(date -u +%s)"; \
 		$(call java_exec,-jar $(top_srcdir)/moira/util/build/libs/util.jar tuscan \
 			-app-cp $$(cat classpath):target/classes/:target/test-classes/ \
-			-mode inter-class -p 1 testsuite > $@ 2> $*tuscan-inter-class-progress.txt); \
+			-mode inter-class testsuite > $@ 2> $*tuscan-inter-class-progress.txt); \
 		if [ $$? -eq 124 ]; then \
 			touch tuscan-inter-class-timed-out; \
 		fi; \
@@ -139,7 +139,7 @@ maven_test_execution_order cp.txt reference-output.csv test-execution-order enum
 		start_time="$$(date -u +%s)"; \
 		$(call java_exec,-jar $(top_srcdir)/moira/util/build/libs/util.jar tuscan \
 			-app-cp $$(cat classpath):target/classes/:target/test-classes/ \
-			-mode packed -p 1 testsuite > $@ 2> $*tuscan-packed-progress.txt); \
+			-mode packed testsuite > $@ 2> $*tuscan-packed-progress.txt); \
 		if [ $$? -eq 124 ]; then \
 			touch tuscan-packed-timed-out; \
 		fi; \
@@ -155,7 +155,7 @@ maven_test_execution_order cp.txt reference-output.csv test-execution-order enum
 		start_time="$$(date -u +%s)"; \
 		$(call java_exec,-jar $(top_srcdir)/moira/util/build/libs/util.jar tuscan \
 			-app-cp $$(cat classpath):target/classes/:target/test-classes/ \
-			-mode target-pairs -p 1 $*target-pairs-profiler-conflicts.txt > $@ 2> $*target-pairs-progress.txt); \
+			-mode target-pairs $*target-pairs-profiler-conflicts.txt > $@ 2> $*target-pairs-progress.txt); \
 		if [ $$? -eq 124 ]; then \
 			touch target-pairs-timed-out; \
 		fi; \
@@ -186,7 +186,7 @@ maven_test_execution_order cp.txt reference-output.csv test-execution-order enum
 		start_time="$$(date -u +%s)"; \
 		$(call java_exec,-jar $(top_srcdir)/moira/util/build/libs/util.jar tuscan \
 			-app-cp $$(cat classpath):target/classes/:target/test-classes/ \
-			-mode pair-cover -p 1 $*online-profiler-conflicts.txt > $@ 2> $*moira-progress.txt); \
+			-mode pair-cover $*online-profiler-conflicts.txt > $@ 2> $*moira-progress.txt); \
 		if [ $$? -eq 124 ]; then \
 			touch moira-timed-out; \
 		fi; \
