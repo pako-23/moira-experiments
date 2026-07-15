@@ -25,4 +25,4 @@ my $avg = $sum / $n;
 my $var = ($squared_sum - $sum * $sum / $n) / ($n - 1);
 my $se  = sqrt($var / $n);
 
-printf "avg=%g se=%g\n", $avg, $se;
+printf "avg=%g se=%g n=%d\n", $avg, $se, $n;
