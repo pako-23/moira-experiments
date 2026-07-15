@@ -11,4 +11,4 @@ while (<>) {
     $progress = ($1*100)/$2 if /progress (\d+)\/(\d+)/
 }
 
-printf "%d\n", $progress if $progress;
+printf "%d\n", $progress if defined($progress);

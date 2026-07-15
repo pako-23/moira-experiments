@@ -14,7 +14,12 @@ while (<>) {
     $squared_sum += $_ * $_;
 }
 
-exit unless ($n == 10);
+exit if $n == 0;
+
+if ($n == 1) {
+    printf "%g\n",$sum;
+    exit;
+}
 
 my $avg = $sum / $n;
 my $var = ($squared_sum - $sum * $sum / $n) / ($n - 1);
