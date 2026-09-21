@@ -88,9 +88,10 @@ maven_test_execution_order cp.txt reference-output.csv test-execution-order enum
 	mkdir -p $(dir $@); touch $@; \
 	if ! [ -f tuscan-class-only-timed-out ]; then \
 		start_time="$$(date -u +%s)"; \
-		$(call java_exec,-jar $(top_srcdir)/moira/util/build/libs/util.jar tuscan \
-			-app-cp $$(cat classpath):target/classes/:target/test-classes/ \
-			-mode class-only testsuite > $@ 2> $*tuscan-class-only-progress.txt); \
+		JAVA_HOME=$(JAVA_HOME) $(top_srcdir)/moira/bin/moira detect \
+			--app-cp=$$(cat classpath):target/classes/:target/test-classes/ \
+			--mode=tuscan-class-only \
+			testsuite > $@ 2> $*tuscan-class-only-progress.txt; \
 		if [ $$? -eq 124 ]; then \
 			touch tuscan-class-only-timed-out; \
 		fi; \
@@ -105,9 +106,10 @@ maven_test_execution_order cp.txt reference-output.csv test-execution-order enum
 	mkdir -p $(dir $@); touch $@; \
 	if ! [ -f tuscan-intra-class-timed-out ]; then \
 		start_time="$$(date -u +%s)"; \
-		$(call java_exec,-jar $(top_srcdir)/moira/util/build/libs/util.jar tuscan \
-			-app-cp $$(cat classpath):target/classes/:target/test-classes/ \
-			-mode intra-class testsuite > $@ 2> $*tuscan-intra-class-progress.txt); \
+		JAVA_HOME=$(JAVA_HOME) $(top_srcdir)/moira/bin/moira detect \
+			--app-cp=$$(cat classpath):target/classes/:target/test-classes/ \
+			--mode=tuscan-intra-class \
+			testsuite > $@ 2> $*tuscan-intra-class-progress.txt; \
 		if [ $$? -eq 124 ]; then \
 			touch tuscan-intra-class-timed-out; \
 		fi; \
@@ -121,9 +123,10 @@ maven_test_execution_order cp.txt reference-output.csv test-execution-order enum
 	mkdir -p $(dir $@); touch $@; \
 	if ! [ -f tuscan-inter-class-timed-out ]; then \
 		start_time="$$(date -u +%s)"; \
-		$(call java_exec,-jar $(top_srcdir)/moira/util/build/libs/util.jar tuscan \
-			-app-cp $$(cat classpath):target/classes/:target/test-classes/ \
-			-mode inter-class testsuite > $@ 2> $*tuscan-inter-class-progress.txt); \
+		JAVA_HOME=$(JAVA_HOME) $(top_srcdir)/moira/bin/moira detect \
+			--app-cp=$$(cat classpath):target/classes/:target/test-classes/ \
+			--mode=tuscan-inter-class \
+			testsuite > $@ 2> $*tuscan-inter-class-progress.txt; \
 		if [ $$? -eq 124 ]; then \
 			touch tuscan-inter-class-timed-out; \
 		fi; \
@@ -137,9 +140,10 @@ maven_test_execution_order cp.txt reference-output.csv test-execution-order enum
 	mkdir -p $(dir $@); touch $@; \
 	if ! [ -f tuscan-packed-timed-out ]; then \
 		start_time="$$(date -u +%s)"; \
-		$(call java_exec,-jar $(top_srcdir)/moira/util/build/libs/util.jar tuscan \
-			-app-cp $$(cat classpath):target/classes/:target/test-classes/ \
-			-mode packed testsuite > $@ 2> $*tuscan-packed-progress.txt); \
+		JAVA_HOME=$(JAVA_HOME) $(top_srcdir)/moira/bin/moira detect \
+			--app-cp=$$(cat classpath):target/classes/:target/test-classes/ \
+			--mode=tuscan-packed \
+			testsuite > $@ 2> $*tuscan-packed-progress.txt; \
 		if [ $$? -eq 124 ]; then \
 			touch tuscan-packed-timed-out; \
 		fi; \
@@ -153,9 +157,10 @@ maven_test_execution_order cp.txt reference-output.csv test-execution-order enum
 	mkdir -p $(dir $@); touch $@; \
 	if ! [ -f target-pairs-timed-out ]; then \
 		start_time="$$(date -u +%s)"; \
-		$(call java_exec,-jar $(top_srcdir)/moira/util/build/libs/util.jar tuscan \
-			-app-cp $$(cat classpath):target/classes/:target/test-classes/ \
-			-mode target-pairs $*target-pairs-profiler-conflicts.txt > $@ 2> $*target-pairs-progress.txt); \
+		JAVA_HOME=$(JAVA_HOME) $(top_srcdir)/moira/bin/moira detect \
+			--app-cp=$$(cat classpath):target/classes/:target/test-classes/ \
+			--mode=target-pairs \
+			$*target-pairs-profiler-conflicts.txt > $@ 2> $*target-pairs-progress.txt; \
 		if [ $$? -eq 124 ]; then \
 			touch target-pairs-timed-out; \
 		fi; \
@@ -167,14 +172,10 @@ maven_test_execution_order cp.txt reference-output.csv test-execution-order enum
 %target-pairs-profiler-conflicts.txt: testsuite classpath
 	mkdir -p $(dir $@) ; \
 	start_time="$$(date -u +%s)" ; \
-	$(call java_exec,-cp $$(cat classpath):target/classes/:target/test-classes/:$(top_srcdir)/moira/moira/build/libs/moira.jar \
-		-javaagent:$(top_srcdir)/moira/agent/build/libs/agent.jar \
-		-Xbootclasspath/a:$(top_srcdir)/moira/agent/build/libs/agent.jar \
-		-Dmoira.profiler.name=TargetPairsProfiler \
-		-Dmoira.profiler.filename=$@ \
-		-Dmoira.agent.filter=java/ \
-		-Dmoira.agent.suspend='' \
-		moira.Moira testsuite) && \
+	JAVA_HOME=$(JAVA_HOME) $(top_srcdir)/moira/bin/moira profile \
+			--app-cp=$$(cat classpath):target/classes/:target/test-classes/ \
+			--profiler=target-pairs --filter=java/ --suspend='' \
+			testsuite > $@ && \
 	echo "target-pairs-profiler: $$(expr "$$(date -u +%s)" - "$$start_time")" >> running-times
 
 .SECONDARY: $(foreach run,$(runs),run-$(run)/target-pairs-profiler-conflicts.txt)
@@ -184,9 +185,10 @@ maven_test_execution_order cp.txt reference-output.csv test-execution-order enum
 	mkdir -p $(dir $@); touch $@; \
 	if ! [ -f moira-timed-out ]; then \
 		start_time="$$(date -u +%s)"; \
-		$(call java_exec,-jar $(top_srcdir)/moira/util/build/libs/util.jar tuscan \
-			-app-cp $$(cat classpath):target/classes/:target/test-classes/ \
-			-mode pair-cover $*online-profiler-conflicts.txt > $@ 2> $*moira-progress.txt); \
+		JAVA_HOME=$(JAVA_HOME) $(top_srcdir)/moira/bin/moira detect \
+			--app-cp=$$(cat classpath):target/classes/:target/test-classes/ \
+			--mode=moira \
+			$*online-profiler-conflicts.txt > $@ 2> $*moira-progress.txt; \
 		if [ $$? -eq 124 ]; then \
 			touch moira-timed-out; \
 		fi; \
@@ -198,35 +200,12 @@ maven_test_execution_order cp.txt reference-output.csv test-execution-order enum
 %online-profiler-conflicts.txt: testsuite classpath
 	mkdir -p $(dir $@) ; \
 	start_time="$$(date -u +%s)" ; \
-	$(call java_exec,-cp $$(cat classpath):target/classes/:target/test-classes/:$(top_srcdir)/moira/moira/build/libs/moira.jar \
-		-javaagent:$(top_srcdir)/moira/agent/build/libs/agent.jar \
-		-Xbootclasspath/a:$(top_srcdir)/moira/agent/build/libs/agent.jar \
-		-Dmoira.profiler.name=OnlineProfiler \
-		-Dmoira.profiler.filename=$@ \
-		moira.Moira testsuite) && \
+	JAVA_HOME=$(JAVA_HOME) $(top_srcdir)/moira/bin/moira profile \
+			--app-cp=$$(cat classpath):target/classes/:target/test-classes/ \
+			--profiler=online testsuite > $@ && \
 	echo "online-profiler: $$(expr "$$(date -u +%s)" - "$$start_time")" >> running-times
 
 .SECONDARY: $(foreach run,$(runs),run-$(run)/online-profiler-conflicts.txt)
-
-%-verified.txt: %-conflicts.txt
-	touch $@; \
-	already_done="$$(find . -name '*-verified.txt' -print0 | grep -vFz "$@" | xargs -0 sort | uniq)" ; \
-	while read -r pair; do \
-		if echo "$$already_done" | grep -cFq "$$pair"; then \
-			echo "$$already_done" | grep -F "$$pair" >> $@; \
-			continue; \
-		fi ; \
-		first="$$(printf "%s\n" "$$pair" | sed -e 's/from: \(.*\), to: .*$$/\1/')"; \
-		second="$$(printf "%s\n" "$$pair" | sed -e 's/from: \(.*\), to: \(.*\)$$/\2/')"; \
-		ordered="$$($(call java_exec,-cp $$(cat classpath):target/classes/:target/test-classes/:$(top_srcdir)/moira/util/build/libs/util.jar moira.util.cli.MoiraUtil verify "$$first" "$$second") | grep OK)" ; \
-		reversed="$$($(call java_exec,-cp $$(cat classpath):target/classes/:target/test-classes/:$(top_srcdir)/moira/util/build/libs/util.jar moira.util.cli.MoiraUtil verify "$$second" "$$first") | grep OK)" ; \
-		if test "$$ordered" = "$$reversed"; then \
-			printf "%s, outcome: INVALID\n" "$$pair" >> $@; \
-		else \
-			printf "%s, outcome: VALID\n" "$$pair" >> $@; \
-		fi; \
-	done < $^
-
 
 
 .PHONY: clean

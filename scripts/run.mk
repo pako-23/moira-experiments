@@ -1,3 +1,5 @@
+MOIRA_VERSION := 0.0.1
+
 run-plain:
 run-electric-test:
 run-tuscan-class-only:
@@ -16,11 +18,7 @@ define experiment_method =
 .PHONY: run-$(1)-$(call experiment_id,$(2))
 run-$(1)-$(call experiment_id,$(2)): \
 	$(call experiment_repodir,$(2))/$(call experiment_subdir,$(2))Makefile \
-	moira/agent/build/libs/agent.jar \
-	moira/moira/build/libs/moira.jar \
-	moira/util/build/libs/util.jar \
-	| $(call experiment_java,$(2)) \
-	$(call experiment_mvn,$(2))
+	|  $(call experiment_java,$(2)) $(call experiment_mvn,$(2))
 	$(MAKE) -C $(call experiment_repodir,$(2))/$(call experiment_subdir,$(2)) $(1)
 
 run-$(1): run-$(1)-$(call experiment_id,$(2))
@@ -37,9 +35,9 @@ $(call experiment_repodir,$(1)): | $(call experiment_java,$(1)) $(call experimen
 	git clone --quiet https://github.com/$(word 2,$(subst $(comma), ,$(1))) $$@ && \
 	cd $$@ && git -c advice.detachedHead=false checkout $(call experiment_commit,$(1)) && \
 	if test -f $(call experiment_repodir,$(1))/mvnw; then \
-		JAVA_HOME=$(PWD)/$(call experiment_java,$(1)) $(PWD)/$(call experiment_repodir,$(1))/mvnw install -DskipTests || true; \
+		JAVA_HOME=$(PWD)/$(call experiment_java,$(1)) $(PWD)/$(call experiment_repodir,$(1))/mvnw install -Dmaven.javadoc.skip=true -DskipTests || true; \
 	else \
-		JAVA_HOME=$(PWD)/$(call experiment_java,$(1)) $(PWD)/$(call experiment_mvn,$(1))/bin/mvn install -DskipTests || true; \
+		JAVA_HOME=$(PWD)/$(call experiment_java,$(1)) $(PWD)/$(call experiment_mvn,$(1))/bin/mvn install -Dmaven.javadoc.skip=true -DskipTests || true; \
 	fi
 endif
 
@@ -125,16 +123,11 @@ $(EXPERIMENTS_DIR):
 	@mkdir $(EXPERIMENTS_DIR)
 
 moira:
-	git clone --quiet https://github.com/pako-23/moira.git
-
-moira/agent/build/libs/agent.jar: | moira
-	cd moira && ./gradlew agent:build
-
-moira/moira/build/libs/moira.jar: | moira
-	cd moira && ./gradlew moira:build
-
-moira/util/build/libs/util.jar: | moira
-	cd moira && ./gradlew util:build
+	rm -f moira-$(MOIRA_VERSION).tar && \
+	wget https://github.com/pako-23/moira/releases/download/v$(MOIRA_VERSION)/moira-$(MOIRA_VERSION).tar && \
+	tar xf moira-$(MOIRA_VERSION).tar && \
+	rm moira-$(MOIRA_VERSION).tar && \
+	mv moira-$(MOIRA_VERSION) moira
 
 $(EXPERIMENTS_DIR)/pradet-replication:
 	git clone https://github.com/gmu-swe/pradet-replication $@ && \
@@ -153,12 +146,16 @@ $(EXPERIMENTS_DIR)/pradet-replication/datadep-detector/target/DependencyDetector
 	$(PWD)/$(EXPERIMENTS_DIR)/apache-maven-3.6.1/bin/mvn clean install -DskipTests
 
 $(EXPERIMENTS_DIR)/jdk8u462-b08: | $(EXPERIMENTS_DIR)
-	@wget -q https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u462-b08/OpenJDK8U-jdk_x64_linux_hotspot_8u462b08.tar.gz -P /tmp && \
-	tar xf /tmp/OpenJDK8U-jdk_x64_linux_hotspot_8u462b08.tar.gz -C $(EXPERIMENTS_DIR)
+	@cd $(EXPERIMENTS_DIR) && rm -f OpenJDK8U-jdk_x64_linux_hotspot_8u462b08.tar.gz && \
+	wget -q https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u462-b08/OpenJDK8U-jdk_x64_linux_hotspot_8u462b08.tar.gz && \
+	tar xf OpenJDK8U-jdk_x64_linux_hotspot_8u462b08.tar.gz && \
+	rm -f OpenJDK8U-jdk_x64_linux_hotspot_8u462b08.tar.gz
 
 $(EXPERIMENTS_DIR)/jdk-24.0.2+12: | $(EXPERIMENTS_DIR)
-	@wget -q https://github.com/adoptium/temurin24-binaries/releases/download/jdk-24.0.2%2B12/OpenJDK24U-jdk_x64_linux_hotspot_24.0.2_12.tar.gz -P /tmp && \
-	tar xf /tmp/OpenJDK24U-jdk_x64_linux_hotspot_24.0.2_12.tar.gz -C $(EXPERIMENTS_DIR)
+	@cd $(EXPERIMENTS_DIR) && rm -f OpenJDK24U-jdk_x64_linux_hotspot_24.0.2_12.tar.gz && \
+	wget -q https://github.com/adoptium/temurin24-binaries/releases/download/jdk-24.0.2%2B12/OpenJDK24U-jdk_x64_linux_hotspot_24.0.2_12.tar.gz && \
+	tar xf OpenJDK24U-jdk_x64_linux_hotspot_24.0.2_12.tar.gz && \
+	rm -f OpenJDK24U-jdk_x64_linux_hotspot_24.0.2_12.tar.gz
 
 .PHONY: java-versions
 java-versions: $(EXPERIMENTS_DIR)/jdk8u462-b08 $(EXPERIMENTS_DIR)/jdk-24.0.2+12
@@ -181,4 +178,5 @@ $(eval $(call mvn_version,3.9.9))
 
 .PHONY: clean
 clean:
-	rm -rf $(EXPERIMENTS_DIR)
+	- rm -rf $(EXPERIMENTS_DIR)
+	- rm -f moira
