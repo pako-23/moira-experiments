@@ -18,7 +18,7 @@ define experiment_method =
 .PHONY: run-$(1)-$(call experiment_id,$(2))
 run-$(1)-$(call experiment_id,$(2)): \
 	$(call experiment_repodir,$(2))/$(call experiment_subdir,$(2))Makefile \
-	|  $(call experiment_java,$(2)) $(call experiment_mvn,$(2))
+	|  $(call experiment_java,$(2)) $(call experiment_mvn,$(2)) moira
 	$(MAKE) -C $(call experiment_repodir,$(2))/$(call experiment_subdir,$(2)) $(1)
 
 run-$(1): run-$(1)-$(call experiment_id,$(2))
@@ -61,8 +61,7 @@ run-$(call experiment_id,$(1)):
 .PHONY: run-plain-$(call experiment_id,$(1))
 run-plain-$(call experiment_id,$(1)): \
 	$(call experiment_repodir,$(1))/$(call experiment_subdir,$(1))Makefile \
-	| $(call experiment_java,$(1)) \
-	$(call experiment_mvn,$(1))
+	| $(call experiment_java,$(1)) $(call experiment_mvn,$(1))
 	$(MAKE) -C $(call experiment_repodir,$(1))/$(call experiment_subdir,$(1)) plain
 
 run-plain: run-plain-$(call experiment_id,$(1))
@@ -73,8 +72,7 @@ run-$(call experiment_id,$(1)): run-plain-$(call experiment_id,$(1))
 run-electric-test-$(call experiment_id,$(1)): \
 	$(call experiment_repodir,$(1))/$(call experiment_subdir,$(1))Makefile \
 	$(EXPERIMENTS_DIR)/pradet-replication/datadep-detector/target/DependencyDetector-0.0.1-SNAPSHOT.jar \
-	| $(call experiment_java,$(1)) \
-	$(call experiment_mvn,$(1))
+	| $(call experiment_java,$(1)) $(call experiment_mvn,$(1))
 	$(MAKE) -C $(call experiment_repodir,$(1))/$(call experiment_subdir,$(1)) electric-test
 
 run-electric-test: run-electric-test-$(call experiment_id,$(1))
