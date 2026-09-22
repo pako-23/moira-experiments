@@ -177,4 +177,4 @@ $(eval $(call mvn_version,3.9.9))
 .PHONY: clean
 clean:
 	- rm -rf $(EXPERIMENTS_DIR)
-	- rm -f moira
+	- rm -rf moira
