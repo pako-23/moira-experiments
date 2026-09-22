@@ -1,0 +1,4 @@
+org.apache.struts2.portlet.dispatcher.Jsr168DispatcherTest[testProcessAction_ok(org.apache.struts2.portlet.dispatcher.Jsr168DispatcherTest)]
+org.apache.struts2.portlet.dispatcher.Jsr168DispatcherTest[testRender_ok(org.apache.struts2.portlet.dispatcher.Jsr168DispatcherTest)]
+org.apache.struts2.portlet.dispatcher.Jsr286DispatcherTest[testProcessAction_ok(org.apache.struts2.portlet.dispatcher.Jsr286DispatcherTest)]
+org.apache.struts2.portlet.dispatcher.Jsr286DispatcherTest[testRender_ok(org.apache.struts2.portlet.dispatcher.Jsr286DispatcherTest)]

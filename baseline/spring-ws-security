@@ -1,0 +1,2 @@
+org.springframework.ws.soap.security.xwss.callback.SpringDigestPasswordValidationCallbackHandlerTest[testAuthenticateUserDigestUserNotFound(org.springframework.ws.soap.security.xwss.callback.SpringDigestPasswordValidationCallbackHandlerTest)]
+org.springframework.ws.soap.security.xwss.callback.SpringDigestPasswordValidationCallbackHandlerTest[testAuthenticateUserDigestValidInvalid(org.springframework.ws.soap.security.xwss.callback.SpringDigestPasswordValidationCallbackHandlerTest)]

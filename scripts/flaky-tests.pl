@@ -8,7 +8,8 @@ my %flaky_tests;
 
 while (<>) {
     chomp;
-    $flaky_tests{$1} = 1 if /from: [^,]+, to: ([^,]+)/
+    s/, type: (?:brittle|victim)$//;
+    $flaky_tests{$1} = 1 if /, to: (.*)/;
 }
 
 printf "%d\n", scalar keys %flaky_tests;

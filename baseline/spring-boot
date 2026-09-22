@@ -1,0 +1,7 @@
+org.springframework.boot.logging.java.JavaLoggingSystemTests[testCustomFormatter(org.springframework.boot.logging.java.JavaLoggingSystemTests)]
+org.springframework.boot.logging.log4j2.Log4J2LoggingSystemTests[loggingThatUsesJulIsCaptured(org.springframework.boot.logging.log4j2.Log4J2LoggingSystemTests)]
+org.springframework.boot.logging.logback.LogbackLoggingSystemTests[bridgeHandlerLifecycle(org.springframework.boot.logging.logback.LogbackLoggingSystemTests)]
+org.springframework.boot.logging.logback.LogbackLoggingSystemTests[loggingLevelIsPropagatedToJul(org.springframework.boot.logging.logback.LogbackLoggingSystemTests)]
+org.springframework.boot.logging.logback.LogbackLoggingSystemTests[loggingThatUsesJulIsCaptured(org.springframework.boot.logging.logback.LogbackLoggingSystemTests)]
+org.springframework.boot.SpringApplicationTests[customBanner(org.springframework.boot.SpringApplicationTests)]
+org.springframework.boot.SpringApplicationTests[enableBannerInLogViaProperty(org.springframework.boot.SpringApplicationTests)]

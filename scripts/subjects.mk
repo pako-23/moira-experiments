@@ -10,11 +10,11 @@ SUBJECTS := \
 	jhipster-registry,jhipster/jhipster-registry,00db36611da5fc7aaf9d5372aa90f2465d80c0c4,.,jdk8u462-b08,apache-maven-3.6.1 \
 	joda-time,JodaOrg/joda-time,d1ea2a53929d7d56d4f4560852e5586517a0dd47,.,jdk8u462-b08,apache-maven-3.6.1 \
 	marine-api,ktuukkan/marine-api,af0003847db9ba822f67d4f1dceb8de3fe63250a,.,jdk8u462-b08,apache-maven-3.6.1 \
-	naming,wildfly/wildfly,b19048b72669fc0e96665b1b125dc1fda21f5993,naming,jdk8u462-b08,apache-maven-3.6.1 \
+	wildfly-naming,wildfly/wildfly,b19048b72669fc0e96665b1b125dc1fda21f5993,naming,jdk8u462-b08,apache-maven-3.6.1 \
 	openpojo,openpojo/openpojo,3b8f736754bbd356e3278e19273cd7aa2dd77f30,.,jdk8u462-b08,apache-maven-3.6.1 \
 	portlet,apache/struts,13d9053050c9e4fb2ef049db6a37d3f6eebf48fa,plugins/portlet,jdk8u462-b08,apache-maven-3.6.1 \
-	request,vmware/admiral,e4b02936cc7d4ff2714e7231db0c4373ba5d48a2,request,jdk8u462-b08,apache-maven-3.6.1 \
-	riptide,zalando/riptide,8277e11fc069d8e24df0d233ef2577cc75659b75,riptide-spring-boot-starter,jdk8u462-b08,apache-maven-3.6.1 \
+	admiral-request,vmware/admiral,e4b02936cc7d4ff2714e7231db0c4373ba5d48a2,request,jdk8u462-b08,apache-maven-3.6.1 \
+	riptideg,zalando/riptide,8277e11fc069d8e24df0d233ef2577cc75659b75,riptide-spring-boot-starter,jdk8u462-b08,apache-maven-3.6.1 \
 	spring-boot,spring-projects/spring-boot,daa3d457b71896a758995c264977bdd1414ee4d4,spring-boot-project/spring-boot,jdk8u462-b08,apache-maven-3.6.1 \
 	spring-boot-actuator-autoconfigure,spring-projects/spring-boot,daa3d457b71896a758995c264977bdd1414ee4d4,spring-boot-project/spring-boot-actuator-autoconfigure,jdk8u462-b08,apache-maven-3.6.1 \
 	spring-boot-test,spring-projects/spring-boot,daa3d457b71896a758995c264977bdd1414ee4d4,spring-boot-project/spring-boot-test,jdk8u462-b08,apache-maven-3.6.1 \
@@ -23,7 +23,7 @@ SUBJECTS := \
 	spring-data-envers,spring-projects/spring-data-envers,aab9302d0223f86316b5b0fcf8de336cea2f74f1,.,jdk8u462-b08,apache-maven-3.6.1 \
 	spring-ws-core,spring-projects/spring-ws,e8d89c9eb0929dda304174729c9c69fb29f448eb,spring-ws-core,jdk8u462-b08,apache-maven-3.6.1 \
 	spring-ws-security,spring-projects/spring-ws,e8d89c9eb0929dda304174729c9c69fb29f448eb,spring-ws-security,jdk8u462-b08,apache-maven-3.6.1 \
-	subsystem,wildfly/wildfly,b19048b72669fc0e96665b1b125dc1fda21f5993,security/subsystem,jdk8u462-b08,apache-maven-3.6.1 \
+	wildfly-subsystem,wildfly/wildfly,b19048b72669fc0e96665b1b125dc1fda21f5993,security/subsystem,jdk8u462-b08,apache-maven-3.6.1 \
 	unix4j-command,tools4j/unix4j,367da7d262e682a08577cdf19ebbbdd8a46870fe,unix4j-core/unix4j-command,jdk8u462-b08,apache-maven-3.6.1 \
 	wdtk-dumpfiles,wikidata/wikidata-toolkit,20de6f7f12319f54eb962ff6e8357b3f5695d54d,wdtk-dumpfiles,jdk8u462-b08,apache-maven-3.6.1 \
 	wdtk-util,wikidata/wikidata-toolkit,20de6f7f12319f54eb962ff6e8357b3f5695d54d,wdtk-util,jdk8u462-b08,apache-maven-3.6.1 \

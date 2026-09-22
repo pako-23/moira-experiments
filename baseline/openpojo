@@ -1,0 +1,7 @@
+com.openpojo.issues.issue112.IssueTest[shouldNotFail(com.openpojo.issues.issue112.IssueTest)]
+com.openpojo.reflection.impl.PojoClassImplTest[shouldCreateInstanceOnAbstract(com.openpojo.reflection.impl.PojoClassImplTest)]
+com.openpojo.reflection.java.packageloader.env.JavaClassPathClassLoaderTest[end2endLoadAllClassesInTheVM(com.openpojo.reflection.java.packageloader.env.JavaClassPathClassLoaderTest)]
+com.openpojo.validation.test.impl.GetterTesterTest[shouldSuccessfullyValidateEvenIfLoggingFails(com.openpojo.validation.test.impl.GetterTesterTest)]
+com.openpojo.validation.test.impl.SerializableTesterTest[shouldSkipOverNonSerializableClass(com.openpojo.validation.test.impl.SerializableTesterTest)]
+com.openpojo.validation.test.impl.SetterTesterTest[shouldSuccessfullyValidateEvenIfLoggingFails(com.openpojo.validation.test.impl.SetterTesterTest)]
+com.openpojo.validation.utils.ValidationHelperTest[shouldReportMissingASMProperly(com.openpojo.validation.utils.ValidationHelperTest)]

@@ -25,7 +25,7 @@ results.tar.gz:
 	@for file in $$(find experiments/ -name running-times -type f); do \
 		tar -rf results.tar  $$file; \
 	done
-	@for script in scripts/stats.mk scripts/subjects.mk scripts/*.pl; do \
+	@for script in scripts/stats.mk scripts/subjects.mk scripts/*.pl baseline/*; do \
 		tar -rf results.tar  $$script; \
 	done
 	@echo 'include scripts/subjects.mk' > Makefile.dist

@@ -1,0 +1,2 @@
+dk.tbsalling.aismessages.nmea.NMEAMessageHandlerTest[canHandleFragmentedMessageReceived(dk.tbsalling.aismessages.nmea.NMEAMessageHandlerTest)]
+dk.tbsalling.aismessages.nmea.NMEAMessageHandlerTest[canHandleUnfragmentedMessageReceived(dk.tbsalling.aismessages.nmea.NMEAMessageHandlerTest)]

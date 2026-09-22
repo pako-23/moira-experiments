@@ -1,0 +1,4 @@
+org.springframework.boot.test.autoconfigure.data.neo4j.DataNeo4jTestIntegrationTests[testRepository(org.springframework.boot.test.autoconfigure.data.neo4j.DataNeo4jTestIntegrationTests)]
+org.springframework.boot.test.autoconfigure.data.redis.DataRedisTestIntegrationTests[testRepository(org.springframework.boot.test.autoconfigure.data.redis.DataRedisTestIntegrationTests)]
+org.springframework.boot.test.autoconfigure.web.servlet.mockmvc.WebMvcTestWebDriverCustomScopeIntegrationTests[shouldBeTheSameWebClient(org.springframework.boot.test.autoconfigure.web.servlet.mockmvc.WebMvcTestWebDriverCustomScopeIntegrationTests)]
+org.springframework.boot.test.autoconfigure.web.servlet.mockmvc.WebMvcTestWebDriverIntegrationTests[shouldBeADifferentWebClient(org.springframework.boot.test.autoconfigure.web.servlet.mockmvc.WebMvcTestWebDriverIntegrationTests)]

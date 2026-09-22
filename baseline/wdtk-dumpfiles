@@ -1,0 +1,3 @@
+org.wikidata.wdtk.dumpfiles.MwDumpFileProcessingTest[testMwDailyDumpFileProcessing(org.wikidata.wdtk.dumpfiles.MwDumpFileProcessingTest)]
+org.wikidata.wdtk.dumpfiles.MwDumpFileProcessingTest[testMwMostRecentFullDumpFileProcessing(org.wikidata.wdtk.dumpfiles.MwDumpFileProcessingTest)]
+org.wikidata.wdtk.dumpfiles.MwDumpFileProcessingTest[testMwRecentCurrentDumpFileProcessing(org.wikidata.wdtk.dumpfiles.MwDumpFileProcessingTest)]

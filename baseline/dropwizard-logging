@@ -1,0 +1,2 @@
+io.dropwizard.logging.DefaultLoggingFactoryPrintErrorMessagesTest[testLogbackStatusPrinterPrintStreamIsRestoredToSystemOut(io.dropwizard.logging.DefaultLoggingFactoryPrintErrorMessagesTest)]
+io.dropwizard.logging.DefaultLoggingFactoryTest[testConfigure(io.dropwizard.logging.DefaultLoggingFactoryTest)]
